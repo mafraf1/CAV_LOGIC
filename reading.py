@@ -309,9 +309,9 @@ def marginOfError(scale, laneCenter, midX):
 def openStream(name):
     #open the stream and return it
     print("writing")
-    model_name='lb2OO07.pt'
+    model_name='/home/raf/local/cuda/bin/lb2OO07.pt'
     #load model
-    model = torch.hub.load('yolov5', 'custom', source='local', path = model_name, force_reload = True)
+    model = torch.hub.load('/home/raf/local/cuda/bin/yolov5', 'custom', source='local', path = model_name, force_reload = True)
     firstFrame = True
     #Opening with openCV
     capture = cv2.VideoCapture(name)
@@ -378,7 +378,7 @@ def convertBird(frame):
   
 def processEachFrame():
     #BREAKING DOWN writeToCSV()
-    capture, model = openStream("vivs/vid.webm")
+    capture, model = openStream("/home/raf/local/cuda/bin/vivs/vid.webm")
     firstFrame = True 
     frame_count = 0
     leftLane = []
