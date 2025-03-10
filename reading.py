@@ -233,6 +233,8 @@ def sortByDist(givenList,scale):
 def splitLaneByImg(coordList, midX, scale):
     leftLane = []
     rightLane = []
+    #DEBUGGING STUFF
+    print("Overall gradient: ", lineOfBest(coordList))
     for point in coordList:
         x, y = point 
         if x < midX and y > (510*scale): #TOP LEFT IS 0,0 and bottm rught is +ve, +ve
@@ -399,9 +401,9 @@ def processEachFrame():
             ### ###
             oldMemory = newMemory
             detections += 1 #used for lane weighting 
-            signDetect(frame,model)
+            #signDetect(frame,model)
             imCopy = frame.copy()
-            proccess(imCopy, scale, model, midX, laneCenter, newMemory, "test")
+            #proccess(imCopy, scale, model, midX, laneCenter, newMemory, "test")
             frame = convertBird(frame)
             laneCenter, newMemory = proccess(frame, scale, model, midX, laneCenter, newMemory, "final")
             if cv2.waitKey(1) == ord('q'):#diplays the image for a set amount of time 
