@@ -17,6 +17,7 @@ import math
 from laneMemory import laneMemory
 from lanes import *
 from scipy.spatial import distance
+from state import laneController
 
 def writeToFile(snapString):
     #Call to write to a file  
@@ -385,6 +386,7 @@ def processEachFrame():
     frame_count = 0
     leftLane = []
     rightLane = []
+    laneState = laneController() 
     #Processing each frame
     try:
         while capture.grab():
@@ -406,6 +408,11 @@ def processEachFrame():
             #proccess(imCopy, scale, model, midX, laneCenter, newMemory, "test")
             frame = convertBird(frame)
             laneCenter, newMemory = proccess(frame, scale, model, midX, laneCenter, newMemory, "final")
+
+            if newMemory.leftExist == True and newMemory.rightExist == True:
+                laneController.changeState
+            else:
+                laneController.changeState
             if cv2.waitKey(1) == ord('q'):#diplays the image for a set amount of time 
                 break
             frame_count += 1

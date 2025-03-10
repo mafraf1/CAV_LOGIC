@@ -8,4 +8,8 @@ class oneLaneState:
         
     #change state to two lane state when both lanes are able to be detected
     def changeState(self):
+        print("State changed to two lanes")
         self.laneState.state =  self.laneState.twolanestate
+    
+    def getState(self):
+        return "One Lane State"
