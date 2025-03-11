@@ -37,6 +37,7 @@ def calcScale(num):
     #calculates scale using midx 960
     scaled = (num / 960) 
     return scaled
+
 def minimum(matrix):
     #return the minimum sized number in a array
     min = 9999999999999999 # +ve infinity 
@@ -58,7 +59,7 @@ def sortByDistance(array):
         idx = idx+ 1 
         y = array[idx] 
         i, j = y
-        if getDist(x,y) < 200:
+        if getDist(x,y) < 40:
             thisList.append(y)
             x = y
     #DEBUG print(thisList)
@@ -145,7 +146,7 @@ def doesLeftOrRightExist(leftLane, rightLane, scale, oldMemory):
         #this distance checking grabs the minimum distance between all points of both lanes
         #it works but if there are many many points in the definition it will run gradually slower as it needs to sort through
         #what is effectively a 2d array
-        if (min < 390 * scale):
+        if (min < 270 * scale):
             if oldMemory.leftExist == True and oldMemory.rightExist == False and 0 > lineOfBest(leftLane + rightLane): #turning right 
                 leftExist = True
                 rightExist = False
