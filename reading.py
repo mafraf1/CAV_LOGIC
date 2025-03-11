@@ -17,8 +17,7 @@ import math
 from laneMemory import laneMemory
 from lanes import *
 from scipy.spatial import distance
-from state import laneController
-
+from state.laneController import *
 def writeToFile(snapString):
     #Call to write to a file  
     #unused 
