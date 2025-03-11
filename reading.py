@@ -237,9 +237,9 @@ def splitLaneByImg(coordList, midX, scale):
     #print("Overall gradient: ", lineOfBest(coordList))
     for point in coordList:
         x, y = point 
-        if x < midX and y > (510*scale): #TOP LEFT IS 0,0 and bottm rught is +ve, +ve
+        if x < midX and y > (900*scale): #TOP LEFT IS 0,0 and bottm rught is +ve, +ve
             leftLane.append(point)
-        elif x >= midX and y > (510*scale) : #300 when using https/webcam --- 500 with video
+        elif x >= midX and y > (900*scale) : #300 when using https/webcam --- 500 with video
             rightLane.append(point)
     return leftLane, rightLane
 
@@ -405,7 +405,7 @@ def processEachFrame():
             #signDetect(frame,model)
             imCopy = frame.copy()
             #proccess(imCopy, scale, model, midX, laneCenter, newMemory, "test")
-            frame = convertBird(frame)
+            #frame = convertBird(frame)
             laneCenter, newMemory = proccess(frame, scale, model, midX, laneCenter, newMemory, "final")
             print("Current State: ", laneState.getState()) 
             #LOGIC TO HANDLE STATE CHANGES 
