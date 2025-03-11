@@ -1,3 +1,7 @@
+import cv2
+import pandas as pd
+from statePattern.sharedFunctions import * 
+
 class twoLaneState:
     #Init State
     def __init__(self, laneState):
@@ -15,5 +19,20 @@ class twoLaneState:
         return 2
     
     #Follows the original process 
-    def proccess(frame, scale, model, midX, laneCenter, newMemory):
-        pass
+    def proccess(self, frame, scale, model, midX, laneCenter, newMemory):
+        rFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = model(rFrame)
+        df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
+        df = df.reset_index() # make sure indexes pair with number of rows
+        df.iterrows()
+        polygonList = usingCSVData(df)
+        polygonList = sortByDist(polygonList, scale) #Gets rid of outliers
+        margin = marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
+        leftLane, rightLane = splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
+        newMemory = doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
+        laneCenter = findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, newMemory.leftExist, newMemory.rightExist, laneCenter)
+        newFrame = overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
+        cv2.imshow("twoLane", newFrame)
+        if newMemory.leftExist == False or newMemory.rightExist == False:
+            self.changeState()
+        return laneCenter, newMemory

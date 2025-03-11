@@ -402,21 +402,22 @@ def processEachFrame():
             ### ###
             oldMemory = newMemory
             detections += 1 #used for lane weighting 
+            laneCenter, newMemory = laneState.proccess(frame, scale, model, midX, laneCenter, newMemory)
             #signDetect(frame,model)
             #imCopy = frame.copy()
             #proccess(imCopy, scale, model, midX, laneCenter, newMemory, "test")
             #frame = convertBird(frame)
-            laneCenter, newMemory = proccess(frame, scale, model, midX, laneCenter, newMemory, "final")
-            print("Current State: ", laneState.getState()) 
-            #LOGIC TO HANDLE STATE CHANGES 
-            if laneState.getState() == 1:
-                if newMemory.leftExist == True and newMemory.rightExist == True:
-                    laneState.changeState()
-            elif laneState.getState() == 2: 
-                if newMemory.leftExist == False or newMemory.rightExist == False:
-                    laneState.changeState()
-            else: 
-                pass #do nothing, error handling 
+            # laneCenter, newMemory = proccess(frame, scale, model, midX, laneCenter, newMemory, "final")
+            # print("Current State: ", laneState.getState()) 
+            # #LOGIC TO HANDLE STATE CHANGES 
+            # if laneState.getState() == 1:
+            #     if newMemory.leftExist == True and newMemory.rightExist == True:
+            #         laneState.changeState()
+            # elif laneState.getState() == 2: 
+            #     if newMemory.leftExist == False or newMemory.rightExist == False:
+            #         laneState.changeState()
+            # else: 
+            #     pass #do nothing, error handling 
         
             if cv2.waitKey(1) == ord('q'):#diplays the image for a set amount of time 
                 break

@@ -14,5 +14,7 @@ class oneLaneState:
     def getState(self):
         return 1
     
-    def proccess(frame, scale, model, midX, laneCenter, newMemory):
+    def proccess(self, frame, scale, model, midX, laneCenter, newMemory):
         pass
+
+    
