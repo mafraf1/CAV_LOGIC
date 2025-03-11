@@ -403,7 +403,7 @@ def processEachFrame():
             oldMemory = newMemory
             detections += 1 #used for lane weighting 
             #signDetect(frame,model)
-            imCopy = frame.copy()
+            #imCopy = frame.copy()
             #proccess(imCopy, scale, model, midX, laneCenter, newMemory, "test")
             #frame = convertBird(frame)
             laneCenter, newMemory = proccess(frame, scale, model, midX, laneCenter, newMemory, "final")

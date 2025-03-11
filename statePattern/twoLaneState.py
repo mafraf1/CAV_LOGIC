@@ -11,6 +11,9 @@ class twoLaneState:
         print("State changed to one lane")
         self.laneState.state =  self.laneState.onelanestate
         
-
     def getState(self):
         return 2
+    
+    #Follows the original process 
+    def proccess(frame, scale, model, midX, laneCenter, newMemory):
+        pass

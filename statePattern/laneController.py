@@ -14,5 +14,10 @@ class laneController:
     def changeState(self):
         self.state.changeState() 
 
+    #To tell us what state it is in
     def getState(self):
         return self.state.getState()
+    
+    #Calls an unique process depending on the state 
+    def proccess(self, frame, scale, model, midX, laneCenter, newMemory): 
+        return self.state.proccess(frame, scale, model, midX, laneCenter, newMemory)
