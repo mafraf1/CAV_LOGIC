@@ -15,6 +15,6 @@ class oneLaneState:
         return 1
     
     def proccess(self, frame, scale, model, midX, laneCenter, newMemory):
-        pass
+        return laneCenter, newMemory
 
     
