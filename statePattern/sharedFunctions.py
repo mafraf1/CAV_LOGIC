@@ -229,7 +229,7 @@ def convertToXList(list):
             xList.append(x)
     return xList
 
-def findLaneCenter(leftLane, rightLane, laneWidth, midX, leftExist, rightExist, lastLaneCenter):
+def findLaneCenter(leftLane, rightLane, laneWidth, midX, lastLaneCenter):
     #Justin's code adapted
     #finds lane center 
     laneCenter = midX

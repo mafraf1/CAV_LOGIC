@@ -80,7 +80,7 @@ def proccess(frame, scale, model, midX, laneCenter, newMemory, displayName):
     #leftLane, rightLane = sortByDistance(polygonList)
     newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
     #print("Left: ", leftExist, "  ", leftLane, "\nRight: ", rightExist, "  ", rightLane)
-    laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, newMemory.leftExist, newMemory.rightExist, laneCenter)
+    laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX,  laneCenter)
     #print(laneCenter)
     newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
     cv2.imshow(displayName, newFrame)
@@ -151,6 +151,7 @@ def processEachFrame():
             df = df.reset_index() # make sure indexes pair with number of rows
             df.iterrows()
             laneCenter, newMemory = laneState.proccess(frame, scale, df, midX, laneCenter, newMemory)
+            print("Current State: ", laneState.getState()) 
             #signDetect(frame,model)
             #imCopy = frame.copy()
             #proccess(imCopy, scale, model, midX, laneCenter, newMemory, "test")

@@ -231,7 +231,7 @@ def selfDrvieAdapt():
                 newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
                 #print("Left: ", leftExist, "  ", leftLane, "\nRight: ", rightExist, "  ", rightLane)
       
-                laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, newMemory.leftExist, newMemory.rightExist, laneCenter)
+                laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
                 #print(laneCenter)
                 newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
                 cv2.imshow("Final", newFrame)

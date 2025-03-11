@@ -25,7 +25,7 @@ class twoLaneState:
         margin = marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
         leftLane, rightLane = splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
         newMemory = doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
-        laneCenter = findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, newMemory.leftExist, newMemory.rightExist, laneCenter)
+        laneCenter = findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
         newFrame = overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         cv2.imshow("final", newFrame)
         if newMemory.leftExist == False or newMemory.rightExist == False:
