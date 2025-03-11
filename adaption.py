@@ -11,7 +11,7 @@ import Jetson.GPIO as GPIO  # Change this if you use a different library
 from reading import *
 import multiprocessing
 from laneMemory import *
-
+from statePattern import sharedFunctions as sf
 class PIDController:
     #Ctrl + C  & Ctrl + V
     def __init__(self, kp, ki, kd,integral_limit):
@@ -110,7 +110,7 @@ def mainLoop():
                 midX = int((frame.shape[1])/2)
                 firstFrame = False
                 laneCenter = midX
-                scale = calcScale(midX)
+                scale = sf.calcScale(midX)
                 newMemory = laneMemory(False, False, [], [])
                 detections = 0
             if not ret:
@@ -207,7 +207,7 @@ def selfDrvieAdapt():
                     midX = int((frame.shape[1])/2)
                     firstFrame = False
                     laneCenter = midX
-                    scale = calcScale(midX)
+                    scale = sf.calcScale(midX)
                     newMemory = laneMemory(False,False,[],[])
               
                 #Convert each frame into RBG
@@ -221,19 +221,19 @@ def selfDrvieAdapt():
                 df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
                 df = df.reset_index() # make sure indexes pair with number of rows
                 df.iterrows()
-                polygonList = usingCSVData(df)
-                polygonList = sortByDist(polygonList, scale) #is necessary
-                margin = marginOfError(scale, laneCenter, midX)
+                polygonList = sf.usingCSVData(df)
+                polygonList = sf.sortByDist(polygonList, scale) #is necessary
+                margin = sf.marginOfError(scale, laneCenter, midX)
                 
-                leftLane, rightLane = splitLaneByImg(polygonList, margin, scale)
+                leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale)
                 detections += 1
                 oldMemory = newMemory
-                newMemory = doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
+                newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
                 #print("Left: ", leftExist, "  ", leftLane, "\nRight: ", rightExist, "  ", rightLane)
       
-                laneCenter = findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, newMemory.leftExist, newMemory.rightExist, laneCenter)
+                laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, newMemory.leftExist, newMemory.rightExist, laneCenter)
                 #print(laneCenter)
-                newFrame = overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
+                newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
                 cv2.imshow("Final", newFrame)
                 if cv2.waitKey(1) == ord('q'):#diplays the image  a set amount of time 
                     break
