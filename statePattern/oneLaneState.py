@@ -38,9 +38,9 @@ class oneLaneState:
         if newMemory.leftExist == True and newMemory.rightExist == True:
             self.changeState() 
         else:
-            leftLane, rightLane = self.defineList(polygonList)
+            leftLane, rightLane = self.defineList(leftLane + rightLane)
             print("LL: ", newMemory.leftExist, "RL: ", newMemory.rightExist)
-            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, newMemory.leftLane, newMemory.rightLane)
+            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
 
         laneCenter = findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
         newFrame = overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
