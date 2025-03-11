@@ -12,4 +12,4 @@ class oneLaneState:
         self.laneState.state =  self.laneState.twolanestate
     
     def getState(self):
-        return "One Lane State"
+        return 1

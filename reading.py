@@ -17,7 +17,7 @@ import math
 from laneMemory import laneMemory
 from lanes import *
 from scipy.spatial import distance
-from state.laneController import *
+from statePattern import laneController as lc
 def writeToFile(snapString):
     #Call to write to a file  
     #unused 
@@ -234,7 +234,7 @@ def splitLaneByImg(coordList, midX, scale):
     leftLane = []
     rightLane = []
     #DEBUGGING STUFF
-    print("Overall gradient: ", lineOfBest(coordList))
+    #print("Overall gradient: ", lineOfBest(coordList))
     for point in coordList:
         x, y = point 
         if x < midX and y > (510*scale): #TOP LEFT IS 0,0 and bottm rught is +ve, +ve
@@ -385,7 +385,7 @@ def processEachFrame():
     frame_count = 0
     leftLane = []
     rightLane = []
-    laneState = laneController() 
+    laneState = lc.laneController() 
     #Processing each frame
     try:
         while capture.grab():
@@ -407,11 +407,17 @@ def processEachFrame():
             #proccess(imCopy, scale, model, midX, laneCenter, newMemory, "test")
             frame = convertBird(frame)
             laneCenter, newMemory = proccess(frame, scale, model, midX, laneCenter, newMemory, "final")
-
-            if newMemory.leftExist == True and newMemory.rightExist == True:
-                laneController.changeState
-            else:
-                laneController.changeState
+            print("Current State: ", laneState.getState()) 
+            #LOGIC TO HANDLE STATE CHANGES 
+            if laneState.getState() == 1:
+                if newMemory.leftExist == True and newMemory.rightExist == True:
+                    laneState.changeState()
+            elif laneState.getState() == 2: 
+                if newMemory.leftExist == False or newMemory.rightExist == False:
+                    laneState.changeState()
+            else: 
+                pass #do nothing, error handling 
+        
             if cv2.waitKey(1) == ord('q'):#diplays the image for a set amount of time 
                 break
             frame_count += 1

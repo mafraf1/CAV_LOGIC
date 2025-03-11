@@ -9,8 +9,8 @@ class twoLaneState:
     #Change state when only one lane is being detected
     def changeState(self):
         print("State changed to one lane")
-        self.laneState.state =  self.laneState.twolanestate
+        self.laneState.state =  self.laneState.onelanestate
         
 
     def getState(self):
-        return "One Lane State"
+        return 2

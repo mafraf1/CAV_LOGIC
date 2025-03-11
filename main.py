@@ -1,5 +1,5 @@
 
-import reading
+from reading import *
 import multiprocessing
 
 def main():
