@@ -11,7 +11,7 @@ import Jetson.GPIO as GPIO  # Change this if you use a different library
 from reading import *
 import multiprocessing
 from laneMemory import *
-
+import sharedFunctions as sf
 class PIDController:
     #Ctrl + C  & Ctrl + V
     def __init__(self, kp, ki, kd,integral_limit):
@@ -36,7 +36,7 @@ def angleToDutyCycle(angle):
 
 def main():
     #
-    mainLoop()
+    selfDrvieAdapt()
 
 def send_data(command):
     #sends data to serial port
@@ -110,7 +110,7 @@ def mainLoop():
                 midX = int((frame.shape[1])/2)
                 firstFrame = False
                 laneCenter = midX
-                scale = calcScale(midX)
+                scale = sf.calcScale(midX)
                 newMemory = laneMemory(False, False, [], [])
                 detections = 0
             if not ret:
@@ -169,11 +169,11 @@ def selfDrvieAdapt():
     #Takes the base line from writetoCSV and adapts selfDive.py over it 
     print("Starting...")
     snapString = 'NULL'
-    model_name='lb2OO07.pt' #manual replace with our current model here 
+    model_name='../lb2OO07.pt' #manual replace with our current model here 
     command = 's'
     #load model
-    model = torch.hub.load('yolov5', 'custom', source='local', path = model_name, force_reload = True)
-    
+    model = torch.hub.load('../yolov5', 'custom', source='local', path = model_name, force_reload = True)
+    laneState = lc.laneController()
     ###### Multiprocessing Shenagans  -- https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
     #Create a manager
     manager = multiprocessing.Manager()
@@ -184,16 +184,12 @@ def selfDrvieAdapt():
     p2 = multiprocessing.Process(target=angleSender, args=(angleQueue, pwm, ))
     p2.start()
     p1.start()
-    videoPath = "/dev/video0"
+    videoPath = "../dev/video0"
     #videoPath = "http://172.25.0.46:9001/camera.cgi" #remoting via vpn 
-    
     firstFrame = True
     #Opening with openCV
     capture = cv2.VideoCapture(videoPath)
     frame_count = 0
-    leftLane = []
-    rightLane = []
-    detections = 0
     capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     #Processing each frame
     try:
@@ -207,7 +203,7 @@ def selfDrvieAdapt():
                     midX = int((frame.shape[1])/2)
                     firstFrame = False
                     laneCenter = midX
-                    scale = calcScale(midX)
+                    scale = sf.calcScale(midX)
                     newMemory = laneMemory(False,False,[],[])
               
                 #Convert each frame into RBG
@@ -217,24 +213,11 @@ def selfDrvieAdapt():
                 results.print() #prints to terminal (optional)
                 #results.save() #saves the image to an exp file (optional)
                 #results.xyxy[0]  # im redictions (tensor) 
-            
                 df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
                 df = df.reset_index() # make sure indexes pair with number of rows
                 df.iterrows()
-                polygonList = usingCSVData(df)
-                polygonList = sortByDist(polygonList, scale) #is necessary
-                margin = marginOfError(scale, laneCenter, midX)
-                
-                leftLane, rightLane = splitLaneByImg(polygonList, margin, scale)
-                detections += 1
-                oldMemory = newMemory
-                newMemory = doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
-                #print("Left: ", leftExist, "  ", leftLane, "\nRight: ", rightExist, "  ", rightLane)
-      
-                laneCenter = findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, newMemory.leftExist, newMemory.rightExist, laneCenter)
-                #print(laneCenter)
-                newFrame = overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
-                cv2.imshow("Final", newFrame)
+    
+                laneCenter, newMemory = laneState.proccess(frame, scale, df, midX, laneCenter, newMemory)
                 if cv2.waitKey(1) == ord('q'):#diplays the image  a set amount of time 
                     break
 
@@ -266,16 +249,6 @@ def selfDrvieAdapt():
                     else:
                         duty_cycle = angleToDutyCycle(90.01)
                     angleQueue.put(duty_cycle)
-                   
-                    
-                  
-                if(detections >= 3): 
-                    newMemory = laneMemory(oldMemory.leftExist, oldMemory.rightExist, [], [])
-                    detections = 0
-                # elif(detections >= 12):
-                #     newMemory = laneMemory(False,  False, [], [])
-                #     detections = 0
-
             frame_count += 1
     except KeyboardInterrupt:
         pass
