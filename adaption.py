@@ -169,10 +169,10 @@ def selfDrvieAdapt():
     #Takes the base line from writetoCSV and adapts selfDive.py over it 
     print("Starting...")
     snapString = 'NULL'
-    model_name='../lb2OO07.pt' #manual replace with our current model here 
+    model_name='/home/jetson/CAV-objectDetection/lb2OO07.pt' #manual replace with our current model here 
     command = 's'
     #load model
-    model = torch.hub.load('../yolov5', 'custom', source='local', path = model_name, force_reload = True)
+    model = torch.hub.load('/home/jetson/CAV-objectDetection/yolov5', 'custom', source='local', path = model_name, force_reload = True)
     laneState = lc.laneController()
     ###### Multiprocessing Shenagans  -- https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
     #Create a manager
@@ -184,7 +184,7 @@ def selfDrvieAdapt():
     p2 = multiprocessing.Process(target=angleSender, args=(angleQueue, pwm, ))
     p2.start()
     p1.start()
-    videoPath = "../dev/video0"
+    videoPath = "/home/jetson/CAV-objectDetection/dev/video0"
     #videoPath = "http://172.25.0.46:9001/camera.cgi" #remoting via vpn 
     firstFrame = True
     #Opening with openCV
