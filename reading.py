@@ -18,7 +18,7 @@ from laneMemory import laneMemory
 from lanes import *
 from scipy.spatial import distance
 from statePattern import laneController as lc
-import sharedFunctions as sf
+from statePattern import sharedFunctions as sf
 def writeToFile(snapString):
     #Call to write to a file  
     #unused 
@@ -54,9 +54,9 @@ def signDetails(image, list):
 def openStream(name):
     #open the stream and return it
     print("writing")
-    model_name='/home/raf/local/cuda/bin/lb2OO07.pt'
+    model_name='/CAV-objectDetection/lb2OO07.pt'
     #load model
-    model = torch.hub.load('/home/raf/local/cuda/bin/yolov5', 'custom', source='local', path = model_name, force_reload = True)
+    model = torch.hub.load('/CAV-objectDetection/yolov5', 'custom', source='local', path = model_name, force_reload = True)
     firstFrame = True
     #Opening with openCV
     capture = cv2.VideoCapture(name)
@@ -123,7 +123,7 @@ def convertBird(frame):
   
 def processEachFrame():
     #BREAKING DOWN writeToCSV()
-    capture, model = openStream("/home/raf/local/cuda/bin/vivs/vid2.webm")
+    capture, model = openStream("/dev/video0")
     firstFrame = True 
     frame_count = 0
     leftLane = []
