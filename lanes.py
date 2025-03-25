@@ -8,7 +8,7 @@ def canny(image):
     
     #PART 3 - Applying Gausian Blur 
     blur = cv2.GaussianBlur(gray, (5,5), 0) #applies a 5 x 5 gausian blur 
-
+    #
     #PART 4 - Canny (Gives us the gradient image)
     canny = cv2.Canny(blur, 50, 150) #maps pixels above 150 threshold, and above 50 if and only if connected to strong gradient
     return canny
