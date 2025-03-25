@@ -2,7 +2,7 @@ import cv2
 import pandas as pd
 import sharedFunctions as sf
 from laneMemory import laneMemory
-
+import torch
 #Enters in after a time limit in oneLaneState
 #the aim is to reposition the CAV into seeing two lanes 
 
@@ -34,6 +34,17 @@ class correctionState:
             #First entered state 
             self.idx = 1
             self.assignPresistentMemory(newMemory)
+            if self.presistentMemory.leftExist == True: 
+                camera_stream = gstreamer_pipeline(sensor_id=1)
+            else: 
+                camera_stream = gstreamer_pipeline(sensor_id=0)
+            #capture, model = openSideStream(camera_stream)
+            capture, model = openSideStream("/home/jetson/CAV-objectDetection/vivs/vid2.webm")
+            
+            capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        
+        #CHECK MAIN CAMERA
+        #OTHERWISE CHECK OTHER CAMERA
         polygonList = sf.usingCSVData(df)
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
         leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
@@ -42,13 +53,62 @@ class correctionState:
         
         if newMemory.leftExist == True and newMemory.rightExist == True:
             self.changeStateTwoLane() 
+            laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
+            capture.release()
         else:
-            leftLane, rightLane = self.defineList(leftLane + rightLane)
-            print("LL: ", newMemory.leftExist, "RL: ", newMemory.rightExist)
+            ret, nFrame = capture.retrieve()
+            rFrame = cv2.cvtColor(nFrame, cv2.COLOR_BGR2RGB)
+            results = model(rFrame)
+            df2 = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
+            df2 = df2.reset_index() # make sure indexes pair with number of rows
+            df2.iterrows()
+            polygonList2 = sf.usingCSVData(df2)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
-
-        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
+            if len(polygonList2) > 4: #gross simplification
+                laneCenter = frame.shape[1]/4
+            else:
+                laneCenter = 3*frame.shape[1]/4
+            cv2.imshow("side_cam", rFrame)
+            
+        
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         
         cv2.imshow("final", newFrame)
         return laneCenter, newMemory
+    
+def openSideStream(camera_stream):
+    #opens the side camera stream as needed 
+    print()
+    model_name='/home/jetson/CAV-objectDetection/lb2OO07.pt' #manual replace with our current model here 
+    model = torch.hub.load('/home/jetson/CAV-objectDetection/yolov5', 'custom', source='local', path = model_name, force_reload = True)
+    #capture = cv2.VideoCapture(camera_stream, cv2.CAP_GSTREAMER)
+    capture = cv2.VideoCapture(camera_stream)
+    return capture, model 
+
+   
+def gstreamer_pipeline( #camera stream
+    sensor_id=0, #id 0 = right, id 1 = left
+    capture_width=640,
+    capture_height=480,
+    display_width=640,
+    display_height=480,
+    framerate=30,
+    flip_method=0,
+):
+    return (
+        "nvarguscamerasrc sensor-id=%d ! "
+        "video/x-raw(memory:NVMM), width=(int)%d, height=(int)%d, framerate=(fraction)%d/1 ! "
+        "nvvidconv flip-method=%d ! "
+        "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
+        "videoconvert ! "
+        "video/x-raw, format=(string)BGR ! appsink"
+        % (
+            sensor_id,
+            capture_width,
+            capture_height,
+            framerate,
+            flip_method,
+            display_width,
+            display_height,
+        )
+    )

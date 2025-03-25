@@ -22,6 +22,10 @@ class oneLaneState:
         self.idx = 0
         self.laneState.state =  self.laneState.twolanestate
     
+    def changeStateCorrection(self):
+        print("State changed to correction state")
+        self.idx = 0
+        self.laneState.state =  self.laneState.correctionState
     def getState(self):
         return 1
     
