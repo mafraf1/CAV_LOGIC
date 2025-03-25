@@ -1,6 +1,6 @@
 import cv2
 import pandas as pd
-from statePattern.sharedFunctions import * 
+import sharedFunctions as sf
 
 class twoLaneState:
     #Init State
@@ -20,15 +20,15 @@ class twoLaneState:
     
     #Follows the original process 
     def proccess(self, frame, scale, df, midX, laneCenter, newMemory):
-        polygonList = usingCSVData(df)
-        polygonList = sortByDist(polygonList, scale) #Gets rid of outliers
-        margin = marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
-        leftLane, rightLane = splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
+        polygonList = sf.usingCSVData(df)
+        polygonList = sf.sortByDist(polygonList, scale) #Gets rid of outliers
+        margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
+        leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
         #leftLane, rightLane = self.betterSort(leftLane,rightLane)
         # rightLane, leftLane = self.betterSort(rightLane,leftLane)
-        newMemory = doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
-        laneCenter = findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
-        newFrame = overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
+        newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
+        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
+        newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         cv2.imshow("final", newFrame)
         if newMemory.leftExist == False or newMemory.rightExist == False:
             self.changeState()

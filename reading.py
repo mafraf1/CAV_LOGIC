@@ -18,7 +18,7 @@ from laneMemory import laneMemory
 from lanes import *
 from scipy.spatial import distance
 from statePattern import laneController as lc
-from statePattern import sharedFunctions as sf
+import sharedFunctions as sf
 def writeToFile(snapString):
     #Call to write to a file  
     #unused 
