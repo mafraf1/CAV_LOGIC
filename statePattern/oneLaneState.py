@@ -1,6 +1,7 @@
 import cv2
 import pandas as pd
 from statePattern.sharedFunctions import * 
+import laneMemory 
 
 class oneLaneState:
     #initalise lane state 
