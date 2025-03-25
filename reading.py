@@ -150,24 +150,8 @@ def processEachFrame():
             df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
             df = df.reset_index() # make sure indexes pair with number of rows
             df.iterrows()
-            laneCenter, newMemory = laneState.proccess(frame, scale, df, midX, laneCenter, newMemory)
-            print("Current State: ", laneState.getState()) 
-            #signDetect(frame,model)
-            #imCopy = frame.copy()
-            #proccess(imCopy, scale, model, midX, laneCenter, newMemory, "test")
-            #frame = convertBird(frame)
-            # laneCenter, newMemory = proccess(frame, scale, model, midX, laneCenter, newMemory, "final")
-            # print("Current State: ", laneState.getState()) 
-            # #LOGIC TO HANDLE STATE CHANGES 
-            # if laneState.getState() == 1:
-            #     if newMemory.leftExist == True and newMemory.rightExist == True:
-            #         laneState.changeState()
-            # elif laneState.getState() == 2: 
-            #     if newMemory.leftExist == False or newMemory.rightExist == False:
-            #         laneState.changeState()
-            # else: 
-            #     pass #do nothing, error handling 
-        
+            laneCenter, newMemory = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory)
+            print("Current State: ", laneState.getState())         
             if cv2.waitKey(1) == ord('q'):#diplays the image for a set amount of time 
                 break
             frame_count += 1

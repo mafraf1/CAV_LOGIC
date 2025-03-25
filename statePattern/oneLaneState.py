@@ -25,12 +25,12 @@ class oneLaneState:
     def changeStateCorrection(self):
         print("State changed to correction state")
         self.idx = 0
-        self.laneState.state =  self.laneState.correctionState
+        self.laneState.state =  self.laneState.correctionstate
     def getState(self):
         return 1
     
     #an unique proccess that continues to turn for a bit, but if it goes too long enter a search functionality
-    def proccess(self, frame, scale, df, midX, laneCenter, newMemory):
+    def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory):
         if self.idx == 0: 
             #First entered state 
             self.idx = 1
@@ -42,6 +42,8 @@ class oneLaneState:
         
         if newMemory.leftExist == True and newMemory.rightExist == True:
             self.changeStateTwoLane() 
+        elif self.idx > 120:
+            self.changeStateCorrection()
         else:
             leftLane, rightLane = self.defineList(leftLane + rightLane)
             print("LL: ", newMemory.leftExist, "RL: ", newMemory.rightExist)
@@ -49,7 +51,7 @@ class oneLaneState:
 
         laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
-        
+        self.idx = self.idx + 1
         cv2.imshow("final", newFrame)
         return laneCenter, newMemory
 

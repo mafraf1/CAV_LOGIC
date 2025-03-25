@@ -29,7 +29,7 @@ class correctionState:
         return 3
     
     #an unique proccess that continues to turn for a bit, but if it goes too long enter a search functionality
-    def proccess(self, frame, scale, df, midX, laneCenter, newMemory):
+    def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory):
         if self.idx == 0: 
             #First entered state 
             self.idx = 1
@@ -38,8 +38,8 @@ class correctionState:
                 camera_stream = gstreamer_pipeline(sensor_id=1)
             else: 
                 camera_stream = gstreamer_pipeline(sensor_id=0)
-            #capture, model = openSideStream(camera_stream)
-            capture, model = openSideStream("/home/jetson/CAV-objectDetection/vivs/vid2.webm")
+            capture = openSideStream(camera_stream)
+            #capture = openSideStream("/home/jetson/CAV-objectDetection/vivs/vid2.webm")
             
             capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         
@@ -78,12 +78,13 @@ class correctionState:
     
 def openSideStream(camera_stream):
     #opens the side camera stream as needed 
-    print()
-    model_name='/home/jetson/CAV-objectDetection/lb2OO07.pt' #manual replace with our current model here 
-    model = torch.hub.load('/home/jetson/CAV-objectDetection/yolov5', 'custom', source='local', path = model_name, force_reload = True)
-    #capture = cv2.VideoCapture(camera_stream, cv2.CAP_GSTREAMER)
-    capture = cv2.VideoCapture(camera_stream)
-    return capture, model 
+    print("opening side camera")
+    #/home/jetson/CAV-objectDetection/
+    #model_name='/home/raf/local/cuda/bin/lb2OO07.pt' #manual replace with our current model here 
+    #model = torch.hub.load('/home/raf/local/cuda/bin/yolov5', 'custom', source='local', path = model_name, force_reload = True)
+    capture = cv2.VideoCapture(camera_stream, cv2.CAP_GSTREAMER)
+    #capture = cv2.VideoCapture(camera_stream)
+    return capture
 
    
 def gstreamer_pipeline( #camera stream
