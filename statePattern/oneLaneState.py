@@ -1,6 +1,6 @@
 import cv2
 import pandas as pd
-from statePattern.sharedFunctions import * 
+import sharedFunctions as sf
 import laneMemory 
 
 class oneLaneState:
@@ -17,7 +17,7 @@ class oneLaneState:
         self.presistentMemory = newMem
 
     #change state to two lane state when both lanes are able to be detected
-    def changeState(self):
+    def changeStateTwoLane(self):
         print("State changed to two lanes")
         self.idx = 0
         self.laneState.state =  self.laneState.twolanestate
@@ -31,20 +31,20 @@ class oneLaneState:
             #First entered state 
             self.idx = 1
             self.assignPresistentMemory(newMemory)
-        polygonList = usingCSVData(df)
-        margin = marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
-        leftLane, rightLane = splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
-        newMemory = doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
+        polygonList = sf.usingCSVData(df)
+        margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
+        leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
+        newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
         
         if newMemory.leftExist == True and newMemory.rightExist == True:
-            self.changeState() 
+            self.changeStateTwoLane() 
         else:
             leftLane, rightLane = self.defineList(leftLane + rightLane)
             print("LL: ", newMemory.leftExist, "RL: ", newMemory.rightExist)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
 
-        laneCenter = findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
-        newFrame = overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
+        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
+        newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         
         cv2.imshow("final", newFrame)
         return laneCenter, newMemory

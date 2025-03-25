@@ -1,6 +1,7 @@
 import cv2
 import pandas as pd
-from statePattern.sharedFunctions import * 
+import sharedFunctions 
+import laneMemory 
 
 #Enters in after a time limit in oneLaneState
 #the aim is to reposition the CAV into seeing two lanes 
