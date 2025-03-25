@@ -1,6 +1,6 @@
 import cv2
 import pandas as pd
-from sharedFunctions import * 
+from statePattern.sharedFunctions import * 
 
 class twoLaneState:
     #Init State

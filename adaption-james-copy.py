@@ -12,6 +12,7 @@ from reading import *
 import multiprocessing
 from laneMemory import *
 from statePattern import sharedFunctions as sf
+
 class PIDController:
     #Ctrl + C  & Ctrl + V
     def __init__(self, kp, ki, kd,integral_limit):
@@ -153,6 +154,33 @@ def angleSender(angleQueue, pwm):
             break 
         sendAngle(pwm, newVal)
     return 
+    
+def gstreamer_pipeline(
+    sensor_id=0,
+    capture_width=640,
+    capture_height=480,
+    display_width=640,
+    display_height=480,
+    framerate=30,
+    flip_method=0,
+):
+    return (
+        "nvarguscamerasrc sensor-id=%d ! "
+        "video/x-raw(memory:NVMM), width=(int)%d, height=(int)%d, framerate=(fraction)%d/1 ! "
+        "nvvidconv flip-method=%d ! "
+        "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
+        "videoconvert ! "
+        "video/x-raw, format=(string)BGR ! appsink"
+        % (
+            sensor_id,
+            capture_width,
+            capture_height,
+            framerate,
+            flip_method,
+            display_width,
+            display_height,
+        )
+    )
 
 def selfDrvieAdapt():
     #Define PID Controller 
@@ -185,12 +213,14 @@ def selfDrvieAdapt():
     p2 = multiprocessing.Process(target=angleSender, args=(angleQueue, pwm, ))
     p2.start()
     p1.start()
-    videoPath = "/dev/video0"
-    #videoPath = "http://172.25.0.46:9001/camera.cgi" #remoting via vpn 
+    #videoPath = "/dev/video0"
+    #videoPath = "http://172.25.0.46:9001/camera.cgi" #remoting via vpn
+    videoPath = gstreamer_pipeline(flip_method=0)
     
     firstFrame = True
     #Opening with openCV
-    capture = cv2.VideoCapture(videoPath)
+    #capture = cv2.VideoCapture(videoPath)
+    capture = cv2.VideoCapture(videoPath, cv2.CAP_GSTREAMER)
     frame_count = 0
     leftLane = []
     rightLane = []
@@ -212,7 +242,7 @@ def selfDrvieAdapt():
                     newMemory = laneMemory(False,False,[],[])
               
                 #Convert each frame into RBG
-                
+                #frame = convertBird(frame)
                 rFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 results = model(rFrame)
                 results.print() #prints to terminal (optional)
