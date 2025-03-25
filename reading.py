@@ -54,9 +54,9 @@ def signDetails(image, list):
 def openStream(name):
     #open the stream and return it
     print("writing")
-    model_name='/CAV-objectDetection/lb2OO07.pt'
+    model_name='/home/raf/local/cuda/bin/lb2OO07.pt'
     #load model
-    model = torch.hub.load('/CAV-objectDetection/yolov5', 'custom', source='local', path = model_name, force_reload = True)
+    model = torch.hub.load('/home/raf/local/cuda/bin/yolov5', 'custom', source='local', path = model_name, force_reload = True)
     firstFrame = True
     #Opening with openCV
     capture = cv2.VideoCapture(name)

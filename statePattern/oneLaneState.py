@@ -1,7 +1,7 @@
 import cv2
 import pandas as pd
 import sharedFunctions as sf
-import laneMemory 
+from laneMemory import laneMemory
 
 class oneLaneState:
     #initalise lane state 

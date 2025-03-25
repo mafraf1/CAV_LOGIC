@@ -47,7 +47,7 @@ class twoLaneState:
         while idx < len(totalList)  - 1: 
             idx = idx+ 1 
             y = totalList[idx] 
-            if getDist(x,y) < 40:
+            if sf.getDist(x,y) < 40:
                 thisList.append(y)
                 if y in rightLane:
                     rightLane.remove(y)
