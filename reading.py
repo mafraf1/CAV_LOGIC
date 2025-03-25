@@ -123,7 +123,7 @@ def convertBird(frame):
   
 def processEachFrame():
     #BREAKING DOWN writeToCSV()
-    capture, model = openStream("/dev/video0")
+    capture, model = openStream("/home/raf/local/cuda/bin/vivs/vid2.webm")
     firstFrame = True 
     frame_count = 0
     leftLane = []
