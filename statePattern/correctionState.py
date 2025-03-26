@@ -70,7 +70,7 @@ class correctionState:
                 laneCenter = 3*frame.shape[1]/4
             cv2.imshow("side_cam", rFrame)
             
-        
+    
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         
         cv2.imshow("final", newFrame)
@@ -98,10 +98,11 @@ def gstreamer_pipeline( #camera stream
 ):
     return (
         "nvarguscamerasrc sensor-id=%d ! "
+        "videoconvert ! "
         "video/x-raw(memory:NVMM), width=(int)%d, height=(int)%d, framerate=(fraction)%d/1 ! "
         "nvvidconv flip-method=%d ! "
         "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
-        "videoconvert ! "
+        
         "video/x-raw, format=(string)BGR ! appsink"
         % (
             sensor_id,
