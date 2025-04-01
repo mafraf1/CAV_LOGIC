@@ -30,7 +30,7 @@ class oneLaneState:
         return 1
     
     #an unique proccess that continues to turn for a bit, but if it goes too long enter a search functionality
-    def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory):
+    def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras):
         if self.idx == 0: 
             #First entered state 
             self.idx = 1

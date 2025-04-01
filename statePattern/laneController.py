@@ -20,5 +20,5 @@ class laneController:
         return self.state.getState()
     
     #Calls an unique process depending on the state 
-    def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory): 
-        return self.state.proccess(frame, scale, model, df, midX, laneCenter, newMemory)
+    def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras): 
+        return self.state.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)

@@ -29,7 +29,7 @@ class correctionState:
         return 3
     
     #an unique proccess that continues to turn for a bit, but if it goes too long enter a search functionality
-    def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory):
+    def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, Icameras):
         if self.idx == 0: 
             #First entered state 
             self.idx = 1
@@ -56,22 +56,22 @@ class correctionState:
             laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
             #capture.release()
         else:
-            ret, nFrame = capture.retrieve()
-            if nFrame: #if it exists 
-                rFrame = cv2.cvtColor(nFrame, cv2.COLOR_BGR2RGB)
+            # ret, nFrame = capture.retrieve()
+            # if nFrame: #if it exists 
+            #     rFrame = cv2.cvtColor(nFrame, cv2.COLOR_BGR2RGB)
 
-                results = model(nFrame)
-                df2 = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
-                df2 = df2.reset_index() # make sure indexes pair with number of rows
-                df2.iterrows()
-                polygonList2 = sf.usingCSVData(df2)
-                newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
-                if len(polygonList2) > 4: #gross simplification
-                    laneCenter = frame.shape[1]/4
-                else:
-                    laneCenter = 3*frame.shape[1]/4
-                cv2.imshow("side_cam", rFrame)
-            
+            #     results = model(nFrame)
+            #     df2 = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
+            #     df2 = df2.reset_index() # make sure indexes pair with number of rows
+            #     df2.iterrows()
+            #     polygonList2 = sf.usingCSVData(df2)
+            #     newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
+            #     if len(polygonList2) > 4: #gross simplification
+            #         laneCenter = frame.shape[1]/4
+            #     else:
+            #         laneCenter = 3*frame.shape[1]/4
+            #     cv2.imshow("side_cam", rFrame)
+            pass
     
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         

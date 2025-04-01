@@ -6,6 +6,7 @@ import torch
 import cv2
 import pandas as pd
 import numpy as np
+from cameraWidget import cameraStreamWidget
 #import matplotlib
 #matplotlib.use("QtAgg")
 from matplotlib import pyplot as plt
@@ -123,7 +124,14 @@ def convertBird(frame):
   
 def processEachFrame():
     #BREAKING DOWN writeToCSV()
-    capture, model = openStream("/home/raf/local/cuda/bin/vivs/vid2.webm")
+    cameras = []
+    #init all streams 
+    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid.webm", "One"))
+    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid2.webm", "Two"))
+    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid3.webm", "Three"))
+    model_name='/home/raf/local/cuda/bin/lb2OO07.pt'
+    #load model
+    model = torch.hub.load('/home/raf/local/cuda/bin/yolov5', 'custom', source='local', path = model_name, force_reload = True)
     firstFrame = True 
     frame_count = 0
     leftLane = []
@@ -131,8 +139,13 @@ def processEachFrame():
     laneState = lc.laneController() 
     #Processing each frame
     try:
-        while capture.grab():
-            ret, frame = capture.retrieve()
+        while True:
+    
+        #            for cam in cameras:
+        #             cam.show_frame()
+
+            #ret, frame = capture.retrieve()
+            frame = cameras[0].returnFrame()
             if firstFrame:
                 midX = int((frame.shape[1])/2)
                 firstFrame = False
@@ -140,8 +153,8 @@ def processEachFrame():
                 scale = sf.calcScale(midX)
                 newMemory = laneMemory(False, False, [], [])
                 detections = 0
-            if not ret:
-                break
+            # if not ret:
+            #     break
             ### ###
             oldMemory = newMemory
             detections += 1 #used for lane weighting 
@@ -150,7 +163,7 @@ def processEachFrame():
             df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
             df = df.reset_index() # make sure indexes pair with number of rows
             df.iterrows()
-            laneCenter, newMemory = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory)
+            laneCenter, newMemory = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
             print("Current State: ", laneState.getState())         
             if cv2.waitKey(1) == ord('q'):#diplays the image for a set amount of time 
                 break
@@ -162,5 +175,7 @@ def processEachFrame():
     except KeyboardInterrupt:
         pass
     #Close
-    capture.release()
+    #capture.release()
+    for cam in cameras: 
+        cam.closeStream() 
     cv2.destroyAllWindows()
