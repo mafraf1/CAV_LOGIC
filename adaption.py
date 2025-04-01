@@ -78,65 +78,6 @@ def drive(memory, midX, laneCenter, previousCommand,pid, frame_rate, commandQueu
 
     return previousCommand
 
-def mainLoop():
-    #Define PID Controller 
-    pid = PIDController(kp = 0.3, ki = 0.2, kd = 0.0002, integral_limit = 100)
-    #
-    GPIO.setwarnings(False)
-    servoPin = 33
-    GPIO.setmode(GPIO.BOARD)  # Use physical pin numberintrimmed.webmg
-    GPIO.setup(servoPin, GPIO.OUT)
-    pwm = GPIO.PWM(servoPin, 50)
-    pwm.start(0) #Intialisation with 0% duty cycle 
-    frame_rate = 30
-    capture, model = openStream("/dev/video0")
-    firstFrame = True 
-    frame_count = 0
-    ###### Multiprocessing Shenagans  -- https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
-    #Create a manager
-    manager = multiprocessing.Manager()
-    #Data strcutres
-    commandQueue = manager.Queue()
-    angleQueue = manager.Queue()
-    p1 = multiprocessing.Process(target=commandSender, args=(commandQueue, ))
-    p2 = multiprocessing.Process(target=angleSender, args=(angleQueue, pwm, ))
-    p2.start()
-    p1.start()
-    #Processing each frame
-    try:
-        while capture.isOpened():
-            ret, frame = capture.read()
-            if firstFrame:
-                midX = int((frame.shape[1])/2)
-                firstFrame = False
-                laneCenter = midX
-                scale = sf.calcScale(midX)
-                newMemory = laneMemory(False, False, [], [])
-                detections = 0
-            if not ret:
-                break
-            ### ###
-            oldMemory = newMemory
-            frame = convertBird(frame)
-            laneCenter, newMemory = proccess(frame, scale, model, midX, laneCenter, newMemory)
-            if cv2.waitKey(1) == ord('q'):#diplays the image for a set amount of time 
-                break
-            frame_count += 1 #used for lane weighting 
-            if frame_count > 10:
-                previousCommand = drive(newMemory, midX, laneCenter, previousCommand, pid, frame_rate, commandQueue, angleQueue)
-            if(detections >= 3): 
-                    newMemory = laneMemory(oldMemory.leftExist, oldMemory.rightExist, [], [])
-                    detections = 0
-            ### ### ### ### ### ### ### ### ###
-    except KeyboardInterrupt:
-        pass
-    #Close
-    commandQueue.put("END")
-    angleQueue.put("END")
-    p1.join()
-    p2.join()
-    capture.release()
-    cv2.destroyAllWindows()
 def commandSender(commandQueue):
     #https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
     while True:
@@ -153,6 +94,34 @@ def angleSender(angleQueue, pwm):
             break 
         sendAngle(pwm, newVal)
     return 
+ 
+def gstreamer_pipeline( #camera stream
+    sensor_id=0, #id 0 = right, id 1 = left
+    capture_width=640,
+    capture_height=480,
+    display_width=640,
+    display_height=480,
+    framerate=30,
+    flip_method=0,
+):
+    return (
+        "nvarguscamerasrc sensor-id=%d ! "
+        "videoconvert ! "
+        "video/x-raw(memory:NVMM), width=(int)%d, height=(int)%d, framerate=(fraction)%d/1 ! "
+        "nvvidconv flip-method=%d ! "
+        "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
+        
+        "video/x-raw, format=(string)BGR ! appsink"
+        % (
+            sensor_id,
+            capture_width,
+            capture_height,
+            framerate,
+            flip_method,
+            display_width,
+            display_height,
+        )
+    )
 
 def selfDrvieAdapt():
     #Define PID Controller 
