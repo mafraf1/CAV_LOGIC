@@ -34,13 +34,13 @@ class correctionState:
             #First entered state 
             self.idx = 1
             self.assignPresistentMemory(newMemory)
-            if self.presistentMemory.leftExist == True: 
-                camera_stream = gstreamer_pipeline(sensor_id=1)
-            else: 
-                camera_stream = gstreamer_pipeline(sensor_id=0)
-            capture = openSideStream(camera_stream)
-            #capture = openSideStream("/home/jetson/CAV-objectDetection/vivs/vid2.webm")
-            
+            # if self.presistentMemory.leftExist == True: 
+            #     camera_stream = gstreamer_pipeline(sensor_id=1)
+            # else: 
+            #     camera_stream = gstreamer_pipeline(sensor_id=0)
+            # capture = openSideStream(camera_stream)
+            capture = openSideStream("/home/raf/local/cuda/bin/vivs/vid.webm")
+            print("Success")
             capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         
         #CHECK MAIN CAMERA
@@ -54,21 +54,23 @@ class correctionState:
         if newMemory.leftExist == True and newMemory.rightExist == True:
             self.changeStateTwoLane() 
             laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
-            capture.release()
+            #capture.release()
         else:
             ret, nFrame = capture.retrieve()
-            rFrame = cv2.cvtColor(nFrame, cv2.COLOR_BGR2RGB)
-            results = model(rFrame)
-            df2 = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
-            df2 = df2.reset_index() # make sure indexes pair with number of rows
-            df2.iterrows()
-            polygonList2 = sf.usingCSVData(df2)
-            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
-            if len(polygonList2) > 4: #gross simplification
-                laneCenter = frame.shape[1]/4
-            else:
-                laneCenter = 3*frame.shape[1]/4
-            cv2.imshow("side_cam", rFrame)
+            if nFrame: #if it exists 
+                rFrame = cv2.cvtColor(nFrame, cv2.COLOR_BGR2RGB)
+
+                results = model(nFrame)
+                df2 = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
+                df2 = df2.reset_index() # make sure indexes pair with number of rows
+                df2.iterrows()
+                polygonList2 = sf.usingCSVData(df2)
+                newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
+                if len(polygonList2) > 4: #gross simplification
+                    laneCenter = frame.shape[1]/4
+                else:
+                    laneCenter = 3*frame.shape[1]/4
+                cv2.imshow("side_cam", rFrame)
             
     
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
@@ -79,11 +81,10 @@ class correctionState:
 def openSideStream(camera_stream):
     #opens the side camera stream as needed 
     print("opening side camera")
-    #/home/jetson/CAV-objectDetection/
-    #model_name='/home/raf/local/cuda/bin/lb2OO07.pt' #manual replace with our current model here 
-    #model = torch.hub.load('/home/raf/local/cuda/bin/yolov5', 'custom', source='local', path = model_name, force_reload = True)
     capture = cv2.VideoCapture(camera_stream, cv2.CAP_GSTREAMER)
-    #capture = cv2.VideoCapture(camera_stream)
+    #raise error 
+    if not capture.isOpened():
+        raise ValueError(f"Failed to open camera stream: {camera_stream}")
     return capture
 
    
