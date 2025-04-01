@@ -138,6 +138,12 @@ def selfDrvieAdapt():
     #Takes the base line from writetoCSV and adapts selfDive.py over it 
     print("Starting...")
     snapString = 'NULL'
+    cameras = []
+    #init all streams 
+    cameras.append(cameraStreamWidget("/dev/video0", "One"))
+    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid2.webm", "Two"))
+    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid3.webm", "Three"))
+
     model_name='/home/jetson/CAV-objectDetection/lb2OO07.pt' #manual replace with our current model here 
     command = 's'
     laneState = lc.laneController()
@@ -167,12 +173,12 @@ def selfDrvieAdapt():
     capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     #Processing each frame
     try:
-        while capture.grab():
-            ret, frame = capture.retrieve()
-            if not ret: 
-                break #bad practice to have a break here, this however is the only remaining line from when I used chatgpt as a point of reference
+        while True:
+            # ret, frame = capture.retrieve()
+            # if not ret: 
+            #     break #bad practice to have a break here, this however is the only remaining line from when I used chatgpt as a point of reference
             if frame_count % 3 == 0: ####Say the fps is 30, runs ten times a second 
-               
+                frame = cameras[0].returnFrame()
                 if firstFrame:
                     midX = int((frame.shape[1])/2)
                     firstFrame = False
@@ -226,12 +232,6 @@ def selfDrvieAdapt():
                    
                     
                   
-                # if(detections >= 3): 
-                #     newMemory = laneMemory(oldMemory.leftExist, oldMemory.rightExist, [], [])
-                #     detections = 0
-                # elif(detections >= 12):
-                #     newMemory = laneMemory(False,  False, [], [])
-                #     detections = 0
 
             frame_count += 1
     except KeyboardInterrupt:
@@ -242,7 +242,9 @@ def selfDrvieAdapt():
     p1.join()
     p2.join()
     send_data('S')
-    capture.release()
+    #capture.release()
+    for cam in cameras: 
+        cam.closeStream() 
     cv2.destroyAllWindows()
     pwm.stop() 
     GPIO.cleanup()

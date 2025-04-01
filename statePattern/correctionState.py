@@ -3,6 +3,7 @@ import pandas as pd
 import sharedFunctions as sf
 from laneMemory import laneMemory
 import torch
+from cameraWidget import * 
 #Enters in after a time limit in oneLaneState
 #the aim is to reposition the CAV into seeing two lanes 
 
@@ -29,19 +30,20 @@ class correctionState:
         return 3
     
     #an unique proccess that continues to turn for a bit, but if it goes too long enter a search functionality
-    def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, Icameras):
+    def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras):
         if self.idx == 0: 
             #First entered state 
-            self.idx = 1
             self.assignPresistentMemory(newMemory)
-            # if self.presistentMemory.leftExist == True: 
-            #     camera_stream = gstreamer_pipeline(sensor_id=1)
-            # else: 
-            #     camera_stream = gstreamer_pipeline(sensor_id=0)
-            # capture = openSideStream(camera_stream)
-            #capture = openSideStream("/home/raf/local/cuda/bin/vivs/vid.webm")
-            #print("Success")
-            #capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+            if self.presistentMemory.leftExist == True: 
+                camera_stream = cameras[2] #right 
+                otherStream = cameras[1]
+                print("Assigned Right")
+            else: 
+                camera_stream = cameras[1] #left
+                otherStream = cameras[2]
+                print("Assigned Lefts")
+            self.idx = 1
+             
         
         #CHECK MAIN CAMERA
         #OTHERWISE CHECK OTHER CAMERA
@@ -54,24 +56,26 @@ class correctionState:
         if newMemory.leftExist == True and newMemory.rightExist == True:
             self.changeStateTwoLane() 
             laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
-            #capture.release()
+            
         else:
-            # ret, nFrame = capture.retrieve()
-            # if nFrame: #if it exists 
-            #     rFrame = cv2.cvtColor(nFrame, cv2.COLOR_BGR2RGB)
+            if camera_stream is None: 
+                pass
+            else: 
+                nFrame = camera_stream.returnFrame() 
+                # if nFrame: #if it exists 
+                rFrame = cv2.cvtColor(nFrame, cv2.COLOR_BGR2RGB)
 
-            #     results = model(nFrame)
-            #     df2 = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
-            #     df2 = df2.reset_index() # make sure indexes pair with number of rows
-            #     df2.iterrows()
-            #     polygonList2 = sf.usingCSVData(df2)
-            #     newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
-            #     if len(polygonList2) > 4: #gross simplification
-            #         laneCenter = frame.shape[1]/4
-            #     else:
-            #         laneCenter = 3*frame.shape[1]/4
-            #     cv2.imshow("side_cam", rFrame)
-            pass
+                results = model(nFrame)
+                df2 = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
+                df2 = df2.reset_index() # make sure indexes pair with number of rows
+                df2.iterrows()
+                polygonList2 = sf.usingCSVData(df2)
+                newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
+                if len(polygonList2) > 4: #gross simplification
+                    laneCenter = frame.shape[1]/4
+                else:
+                    laneCenter = 3*frame.shape[1]/4
+                cv2.imshow("side_cam", rFrame)
     
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         
