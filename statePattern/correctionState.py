@@ -39,9 +39,9 @@ class correctionState:
             # else: 
             #     camera_stream = gstreamer_pipeline(sensor_id=0)
             # capture = openSideStream(camera_stream)
-            capture = openSideStream("/home/raf/local/cuda/bin/vivs/vid.webm")
-            print("Success")
-            capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+            #capture = openSideStream("/home/raf/local/cuda/bin/vivs/vid.webm")
+            #print("Success")
+            #capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         
         #CHECK MAIN CAMERA
         #OTHERWISE CHECK OTHER CAMERA
