@@ -4,6 +4,7 @@ import sharedFunctions as sf
 from laneMemory import laneMemory
 import torch
 from cameraWidget import * 
+from cavErrors import *
 #Enters in after a time limit in oneLaneState
 #the aim is to reposition the CAV into seeing two lanes 
 
@@ -86,8 +87,8 @@ class correctionState:
                     else:
                         laneCenter = 3*frame.shape[1]/4 #Turn Left
                 cv2.imshow("side_cam", nFrame)
-            else:
-                raise 
+            else: #raise an error message 
+                CameraStreamError("Camera Stream is null")#raise error
     
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         

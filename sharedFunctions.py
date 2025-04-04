@@ -1,4 +1,4 @@
-#used to share functionally 
+#used to share functionally and declutter reading.py 
 import cv2
 import pandas as pd
 import numpy as np
@@ -41,7 +41,7 @@ def calcScale(num):
 def minimum(matrix):
     #return the minimum sized number in a array
     min = 9999999999999999 # +ve infinity 
-    for array in matrix:
+    for array in matrix: #O(n^2) Very bad 
         for x in array:
             if (x < min):
                 min = x
