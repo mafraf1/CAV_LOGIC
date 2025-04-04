@@ -1,11 +1,13 @@
 #Reads a source (has to be manually defined (a possible optimisation/QoL)) passes it through YoloV5, pulls the data from YoloV5 to be used elsewhere
 #Left lane = -ve gradient
 #Right Lane = +ve gradient
-# 0,0 top left
+# 0,0 top left 
 import torch
 import cv2
+from gstreamerPipeline import gstreamer_pipeline 
 import pandas as pd
 import numpy as np
+from cameraWidget import cameraStreamWidget
 #import matplotlib
 #matplotlib.use("QtAgg")
 from matplotlib import pyplot as plt
@@ -120,10 +122,17 @@ def convertBird(frame):
     nwIm = warpedImg #cv2.cvtColor(warpedImg, cv2.COLOR)
     # cv2.imshow("BE",nwIm)
     return nwIm
-  
+
 def processEachFrame():
     #BREAKING DOWN writeToCSV()
-    capture, model = openStream("/home/raf/local/cuda/bin/vivs/vid2.webm")
+    cameras = []
+    #init all streams 
+    cameras.append(cameraStreamWidget("/dev/video0", "One"))
+    cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=0)), "Two"))
+    cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=1)), "Three"))
+    model_name='/home/jetson/CAV-objectDetection/lb2OO07.pt'
+    #load model
+    model = torch.hub.load('/home/jetson/CAV-objectDetection/yolov5', 'custom', source='local', path = model_name, force_reload = True)
     firstFrame = True 
     frame_count = 0
     leftLane = []
@@ -131,8 +140,13 @@ def processEachFrame():
     laneState = lc.laneController() 
     #Processing each frame
     try:
-        while capture.grab():
-            ret, frame = capture.retrieve()
+        while True:
+    
+        #            for cam in cameras:
+        #             cam.show_frame()
+
+            #ret, frame = capture.retrieve()
+            frame = cameras[0].returnFrame()
             if firstFrame:
                 midX = int((frame.shape[1])/2)
                 firstFrame = False
@@ -140,8 +154,8 @@ def processEachFrame():
                 scale = sf.calcScale(midX)
                 newMemory = laneMemory(False, False, [], [])
                 detections = 0
-            if not ret:
-                break
+            # if not ret:
+            #     break
             ### ###
             oldMemory = newMemory
             detections += 1 #used for lane weighting 
@@ -150,7 +164,7 @@ def processEachFrame():
             df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
             df = df.reset_index() # make sure indexes pair with number of rows
             df.iterrows()
-            laneCenter, newMemory = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory)
+            laneCenter, newMemory = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
             print("Current State: ", laneState.getState())         
             if cv2.waitKey(1) == ord('q'):#diplays the image for a set amount of time 
                 break
@@ -160,7 +174,11 @@ def processEachFrame():
                     detections = 0
             ### ### ### ### ### ### ### ### ###
     except KeyboardInterrupt:
-        pass
+        pass 
+    except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
+        print(f"Immediate stop of function: {e}")
     #Close
-    capture.release()
+    #capture.release()
+    for cam in cameras: 
+        cam.closeStream() 
     cv2.destroyAllWindows()

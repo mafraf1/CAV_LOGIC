@@ -11,7 +11,7 @@ import Jetson.GPIO as GPIO  # Change this if you use a different library
 from reading import *
 import multiprocessing
 from laneMemory import *
-from statePattern import sharedFunctions as sf
+import sharedFunctions as sf
 class PIDController:
     #Ctrl + C  & Ctrl + V
     def __init__(self, kp, ki, kd,integral_limit):
@@ -78,65 +78,6 @@ def drive(memory, midX, laneCenter, previousCommand,pid, frame_rate, commandQueu
 
     return previousCommand
 
-def mainLoop():
-    #Define PID Controller 
-    pid = PIDController(kp = 0.3, ki = 0.2, kd = 0.0002, integral_limit = 100)
-    #
-    GPIO.setwarnings(False)
-    servoPin = 33
-    GPIO.setmode(GPIO.BOARD)  # Use physical pin numberintrimmed.webmg
-    GPIO.setup(servoPin, GPIO.OUT)
-    pwm = GPIO.PWM(servoPin, 50)
-    pwm.start(0) #Intialisation with 0% duty cycle 
-    frame_rate = 30
-    capture, model = openStream("/dev/video0")
-    firstFrame = True 
-    frame_count = 0
-    ###### Multiprocessing Shenagans  -- https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
-    #Create a manager
-    manager = multiprocessing.Manager()
-    #Data strcutres
-    commandQueue = manager.Queue()
-    angleQueue = manager.Queue()
-    p1 = multiprocessing.Process(target=commandSender, args=(commandQueue, ))
-    p2 = multiprocessing.Process(target=angleSender, args=(angleQueue, pwm, ))
-    p2.start()
-    p1.start()
-    #Processing each frame
-    try:
-        while capture.isOpened():
-            ret, frame = capture.read()
-            if firstFrame:
-                midX = int((frame.shape[1])/2)
-                firstFrame = False
-                laneCenter = midX
-                scale = sf.calcScale(midX)
-                newMemory = laneMemory(False, False, [], [])
-                detections = 0
-            if not ret:
-                break
-            ### ###
-            oldMemory = newMemory
-            frame = convertBird(frame)
-            laneCenter, newMemory = proccess(frame, scale, model, midX, laneCenter, newMemory)
-            if cv2.waitKey(1) == ord('q'):#diplays the image for a set amount of time 
-                break
-            frame_count += 1 #used for lane weighting 
-            if frame_count > 10:
-                previousCommand = drive(newMemory, midX, laneCenter, previousCommand, pid, frame_rate, commandQueue, angleQueue)
-            if(detections >= 3): 
-                    newMemory = laneMemory(oldMemory.leftExist, oldMemory.rightExist, [], [])
-                    detections = 0
-            ### ### ### ### ### ### ### ### ###
-    except KeyboardInterrupt:
-        pass
-    #Close
-    commandQueue.put("END")
-    angleQueue.put("END")
-    p1.join()
-    p2.join()
-    capture.release()
-    cv2.destroyAllWindows()
 def commandSender(commandQueue):
     #https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
     while True:
@@ -153,7 +94,33 @@ def angleSender(angleQueue, pwm):
             break 
         sendAngle(pwm, newVal)
     return 
-
+ 
+def gstreamer_pipeline(
+    sensor_id=0,
+    capture_width=640,
+    capture_height=480,
+    display_width=640,
+    display_height=480,
+    framerate=30,
+    flip_method=0,
+):
+    return (
+        "nvarguscamerasrc sensor-id=%d ! "
+        "video/x-raw(memory:NVMM), width=(int)%d, height=(int)%d, framerate=(fraction)%d/1 ! "
+        "nvvidconv flip-method=%d ! "
+        "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
+        "videoconvert ! "
+        "video/x-raw, format=(string)BGR ! appsink"
+        % (
+            sensor_id,
+            capture_width,
+            capture_height,
+            framerate,
+            flip_method,
+            display_width,
+            display_height,
+        )
+    )
 def selfDrvieAdapt():
     #Define PID Controller 
     pid = PIDController(kp = 0.3, ki = 0.2, kd = 0.0002, integral_limit = 100)
@@ -169,6 +136,11 @@ def selfDrvieAdapt():
     #Takes the base line from writetoCSV and adapts selfDive.py over it 
     print("Starting...")
     snapString = 'NULL'
+    cameras = []
+    #init all streams 
+    cameras.append(cameraStreamWidget("/dev/video2", "One"))
+    cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=0)), "Two"))
+    cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=1)), "Three"))
     model_name='/home/jetson/CAV-objectDetection/lb2OO07.pt' #manual replace with our current model here 
     command = 's'
     laneState = lc.laneController()
@@ -190,20 +162,22 @@ def selfDrvieAdapt():
     
     firstFrame = True
     #Opening with openCV
-    capture = cv2.VideoCapture(videoPath)
+    #capture = cv2.VideoCapture(videoPath)
     frame_count = 0
     leftLane = []
     rightLane = []
     detections = 0
-    capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+    #capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     #Processing each frame
     try:
-        while capture.grab():
-            ret, frame = capture.retrieve()
-            if not ret: 
-                break #bad practice to have a break here, this however is the only remaining line from when I used chatgpt as a point of reference
+        while True:
+            # ret, frame = capture.retrieve()
+            # if not ret: 
+            #     break #bad practice to have a break here, this however is the only remaining line from when I used chatgpt as a point of reference
+            
+            frame = cameras[0].returnFrame()
             if frame_count % 3 == 0: ####Say the fps is 30, runs ten times a second 
-               
+                
                 if firstFrame:
                     midX = int((frame.shape[1])/2)
                     firstFrame = False
@@ -212,7 +186,7 @@ def selfDrvieAdapt():
                     newMemory = laneMemory(False,False,[],[])
               
                 #Convert each frame into RBG
-                
+                print("State: ", laneState.getState())
                 rFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 results = model(rFrame)
                 results.print() #prints to terminal (optional)
@@ -222,7 +196,7 @@ def selfDrvieAdapt():
                 df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
                 df = df.reset_index() # make sure indexes pair with number of rows
                 df.iterrows()
-                laneCenter, newMemory = laneState.proccess(frame, scale, df, midX, laneCenter, newMemory)
+                laneCenter, newMemory = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
                 if cv2.waitKey(1) == ord('q'):#diplays the image  a set amount of time 
                     break
 
@@ -257,23 +231,21 @@ def selfDrvieAdapt():
                    
                     
                   
-                # if(detections >= 3): 
-                #     newMemory = laneMemory(oldMemory.leftExist, oldMemory.rightExist, [], [])
-                #     detections = 0
-                # elif(detections >= 12):
-                #     newMemory = laneMemory(False,  False, [], [])
-                #     detections = 0
 
             frame_count += 1
     except KeyboardInterrupt:
         pass
+    except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
+        print(f"Immediate stop of function: {e}")
     #Close and release
     commandQueue.put("END")
     angleQueue.put("END")
     p1.join()
     p2.join()
     send_data('S')
-    capture.release()
+    #capture.release()
+    for cam in cameras: 
+        cam.closeStream() 
     cv2.destroyAllWindows()
     pwm.stop() 
     GPIO.cleanup()
