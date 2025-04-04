@@ -287,9 +287,9 @@ def selfDrvieAdapt():
                    
                     
                   
-                if(detections >= 3): 
-                    newMemory = laneMemory(oldMemory.leftExist, oldMemory.rightExist, [], [])
-                    detections = 0
+                # if(detections >= 3): 
+                #     newMemory = laneMemory(oldMemory.leftExist, oldMemory.rightExist, [], [])
+                #     detections = 0
                 # elif(detections >= 12):
                 #     newMemory = laneMemory(False,  False, [], [])
                 #     detections = 0
