@@ -154,7 +154,7 @@ def processEachFrame():
                 scale = sf.calcScale(midX)
                 newMemory = laneMemory(False, False, [], [])
                 detections = 0
-            # if not ret:
+            #if not ret:
             #     break
             ### ###
             oldMemory = newMemory
