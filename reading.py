@@ -127,12 +127,12 @@ def processEachFrame():
     #BREAKING DOWN writeToCSV()
     cameras = []
     #init all streams 
-    cameras.append(cameraStreamWidget("/dev/video0", "One"))
-    # cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=0)), "Two"))
-    # cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=1)), "Three"))
-    model_name='/home/jetson/CAV-objectDetection/lb2OO07.pt'
+    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid.webm", "One"))
+    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid2.webm", "Two"))
+    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid3.webm", "Three"))
+    model_name='/home/raf/local/cuda/bin/lb2OO07.pt'
     #load model
-    model = torch.hub.load('/home/jetson/CAV-objectDetection/yolov5', 'custom', source='local', path = model_name, force_reload = True)
+    model = torch.hub.load('/home/raf/local/cuda/bin/yolov5', 'custom', source='local', path = model_name, force_reload = True)
     firstFrame = True 
     frame_count = 0
     leftLane = []
