@@ -10,17 +10,18 @@ def main():
     # #p2.start()
     # p2.join
     #p2.join
-    # cameras = []
-    # cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid.webm", "One"))
-    # cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid3.webm", "Three"))
-    # while True:
-    #     try:
-    #         for cam in cameras:
-    #             cam.show_frame()
-    #     except AttributeError:
-    #         pass
+    cameras = []
+    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid.webm", "One"))
+    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid2.webm", "tWO"))
+    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid3.webm", "Three"))
+    while True:
+        try:
+            for cam in cameras:
+                cam.show_frame()
+        except AttributeError:
+            pass
     #cameras.append(cameraStreamWidget())
-    processEachFrame()
+    #processEachFrame()
     print("Completed")
 
 main()

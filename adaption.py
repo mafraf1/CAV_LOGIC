@@ -141,8 +141,8 @@ def selfDrvieAdapt():
     cameras = []
     #init all streams 
     cameras.append(cameraStreamWidget("/dev/video0", "One"))
-    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid2.webm", "Two"))
-    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid3.webm", "Three"))
+    cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=0), cv2.CAP_GSTREAMER), "Two"))
+    cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=1), cv2.CAP_GSTREAMER), "Three"))
 
     model_name='/home/jetson/CAV-objectDetection/lb2OO07.pt' #manual replace with our current model here 
     command = 's'
@@ -165,12 +165,12 @@ def selfDrvieAdapt():
     
     firstFrame = True
     #Opening with openCV
-    capture = cv2.VideoCapture(videoPath)
+    #capture = cv2.VideoCapture(videoPath)
     frame_count = 0
     leftLane = []
     rightLane = []
     detections = 0
-    capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+    #capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     #Processing each frame
     try:
         while True:

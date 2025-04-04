@@ -33,7 +33,7 @@ class cameraStreamWidget(object):
             exit(1)
 
     def returnFrame(self):
-        return self.frame 
+    return self.frame 
     def closeStream(self):
         self.capture.release()
 
