@@ -1,8 +1,6 @@
 from cameraWidget import cameraStreamWidget
 from reading import *
 
-
- 
 def gstreamer_pipeline(
     sensor_id=0,
     capture_width=640,

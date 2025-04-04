@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as ply
-import math
+#CANNY EDGE DETECTION ATTEMPT 
 def canny(image): 
     #PART 2 - grayscale conversion
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY) #RGB to greyscale

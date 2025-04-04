@@ -2,7 +2,6 @@ import cv2
 import pandas as pd
 import sharedFunctions as sf
 from laneMemory import laneMemory
-import torch
 from cameraWidget import * 
 from cavErrors import *
 #Enters in after a time limit in oneLaneState
