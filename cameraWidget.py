@@ -9,6 +9,9 @@ import time
 class cameraStreamWidget(object):
     def __init__(self, src, frameName):
         #inits object/Widget
+        # if strmr == True: 
+        #     self.capture = cv2.VideoCapture(src,cv2.CAP_GSTREAMER)
+        # else:
         self.capture = cv2.VideoCapture(src)
         self.frameName = frameName 
         #Start the trhead to begin reading frames from the video/camera stream
@@ -33,7 +36,9 @@ class cameraStreamWidget(object):
             exit(1)
 
     def returnFrame(self):
-    return self.frame 
+        ret, sFrame = self.capture.retrieve()
+        return sFrame
+    
     def closeStream(self):
         self.capture.release()
 

@@ -1,9 +1,10 @@
 #Reads a source (has to be manually defined (a possible optimisation/QoL)) passes it through YoloV5, pulls the data from YoloV5 to be used elsewhere
 #Left lane = -ve gradient
 #Right Lane = +ve gradient
-# 0,0 top left
+# 0,0 top left 
 import torch
 import cv2
+from gstreamerPipeline import gstreamer_pipeline 
 import pandas as pd
 import numpy as np
 from cameraWidget import cameraStreamWidget
@@ -121,17 +122,17 @@ def convertBird(frame):
     nwIm = warpedImg #cv2.cvtColor(warpedImg, cv2.COLOR)
     # cv2.imshow("BE",nwIm)
     return nwIm
-  
+
 def processEachFrame():
     #BREAKING DOWN writeToCSV()
     cameras = []
     #init all streams 
-    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid.webm", "One"))
-    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid2.webm", "Two"))
-    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid3.webm", "Three"))
-    model_name='/home/raf/local/cuda/bin/lb2OO07.pt'
+    cameras.append(cameraStreamWidget("/dev/video0", "One"))
+    cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=0)), "Two"))
+    cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=1)), "Three"))
+    model_name='/home/jetson/CAV-objectDetection/lb2OO07.pt'
     #load model
-    model = torch.hub.load('/home/raf/local/cuda/bin/yolov5', 'custom', source='local', path = model_name, force_reload = True)
+    model = torch.hub.load('/home/jetson/CAV-objectDetection/yolov5', 'custom', source='local', path = model_name, force_reload = True)
     firstFrame = True 
     frame_count = 0
     leftLane = []
@@ -173,7 +174,9 @@ def processEachFrame():
                     detections = 0
             ### ### ### ### ### ### ### ### ###
     except KeyboardInterrupt:
-        pass
+        pass 
+    except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
+        print(f"Immediate stop of function: {e}")
     #Close
     #capture.release()
     for cam in cameras: 
