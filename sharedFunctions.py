@@ -188,6 +188,13 @@ def splitLaneByImg(coordList, midX, scale):
     rightLane = []
     #DEBUGGING STUFF
     #print("Overall gradient: ", lineOfBest(coordList))
+    if coordList is None: #Guard conditon One
+        return []
+    #define midx as the average (mean) of the coordlist x coordinates 
+    x_coord = [coordinates[0] for coordinates in coordList]
+    if x_coord is None:
+        return []  #Guard Condition 2 
+    midX = sum(x_coord)/len(x_coord)
     for point in coordList:
         x, y = point 
         if x < midX and y > (900*scale): #TOP LEFT IS 0,0 and bottm rught is +ve, +ve
