@@ -267,3 +267,15 @@ def marginOfError(scale, laneCenter, midX):
     else:
         margin = midX
     return margin
+
+
+def getPolygonList(frame, model):
+    #to reduce code dupe 
+    #process a frame and returns a list of points 
+    nFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = model(nFrame)
+    df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
+    df = rightDf.reset_index() # make sure indexes pair with number of rows
+    df.iterrows()
+    polygonList = usingCSVData(df) 
+    return polygonList

@@ -62,10 +62,19 @@ class oneLaneState:
             #print("LL: ", newMemory.leftExist, leftLane, "RL: ", newMemory.rightExist, rightLane)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
             self.idx = self.idx + 1
-
         laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         
+        rightFrame = cameras[1].returnFrame()  # one = right, 2 = left
+        leftFrame = cameras[2].returnFrame()
+        if (rightFrame and leftFrame) is not None: #if it exists 
+            rPL = sf.getPolygonList(rightFrame) 
+            lPL = sf.getPolygonList(leftFrame)
+           
+
+            cv2.imshow("right_cam", rightFrame)
+            cv2.imshow("right_cam", leftFrame)
+       
         cv2.imshow("final", newFrame)
         print("OLS INDEX ", self.idx, "PRESISTANT ", self.presistentMemory.leftExist, " ", self.presistentMemory.rightExist)
         return laneCenter, newMemory
@@ -79,3 +88,13 @@ class oneLaneState:
         elif self.presistentMemory.rightExist == True:
             rightLane = polygonList
         return leftLane, rightLane
+
+
+def compareRightCamAndLeftCam(rPL, lPL, lc):
+    # compares the polygon list of both right and left cameras, and uses it to judge where the CAV is in relation to the road   
+    # adds/removes 30 pixels to the lane center in order to help rebalance 
+    # rPL = right Polygon List
+    # lPL = left Polygon List 
+    # lc  = lane Center 
+    # IF X AVG OF rPL ~= lPl (moe of 99) then we are in the centre of the frame 
+    pass 
