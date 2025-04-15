@@ -43,7 +43,10 @@ class oneLaneState:
             self.idx = 1
             self.assignPresistentMemory(newMemory)
         polygonList = sf.usingCSVData(df)
+
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
+        #TODO FIXERROR HERE
+        #print("pl", polygonList, "margin", margin, "sclae", scale)
         leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
         newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
         
@@ -116,7 +119,7 @@ def compareRightCamAndLeftCam(rPL, lPL, lc, frameWidth):
 def getXAvg(list):
     #given a list of coordinates get x average of all coordinates 
     x_coord = [coordinates[0] for coordinates in list]
-    if x_coord is None:
+    if x_coord is None or len(list) < 5 or len(x_coord) == 0:
         return 0   #Guard Condition TODO: ERR handle
     midX = sum(x_coord)/len(x_coord)
     return midX 

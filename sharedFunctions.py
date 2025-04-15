@@ -205,7 +205,7 @@ def splitLaneByImg(coordList, midX, scale):
         return []
     #define midx as the average (mean) of the coordlist x coordinates 
     x_coord = [coordinates[0] for coordinates in coordList]
-    if x_coord is None:
+    if x_coord is None or len(x_coord) == 0:
         return []  #Guard Condition 2 
     midX = sum(x_coord)/len(x_coord)
     for point in coordList:
@@ -290,6 +290,7 @@ def getPolygonList(frame, model):
     df = df.reset_index() # make sure indexes pair with number of rows
     df.iterrows()
     polygonList = usingCSVData(df) 
+    polygonList = [coordinates for coordinates in polygonList if coordinates[1] > 300] #filtering the list
     return polygonList
 
 def mapDisplay(leftLane, rightLane, laneCenter):
