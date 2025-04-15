@@ -70,13 +70,12 @@ class oneLaneState:
         if (rightFrame is not None and leftFrame is not None) : #if it exists 
             rPL = sf.getPolygonList(rightFrame, model) 
             lPL = sf.getPolygonList(leftFrame, model)
-           
-
+            laneCenter = compareRightCamAndLeftCam(rPL, lPL, laneCenter, frame.shape[1])
             cv2.imshow("right_cam", rightFrame)
-            cv2.imshow("right_cam", leftFrame)
+            cv2.imshow("left_cam", leftFrame)
        
         cv2.imshow("final", newFrame)
-        print("OLS INDEX ", self.idx, "PRESISTANT ", self.presistentMemory.leftExist, " ", self.presistentMemory.rightExist)
+        #print("OLS INDEX ", self.idx, "PRESISTANT ", self.presistentMemory.leftExist, " ", self.presistentMemory.rightExist)
         return laneCenter, newMemory
 
     
@@ -90,11 +89,32 @@ class oneLaneState:
         return leftLane, rightLane
 
 
-def compareRightCamAndLeftCam(rPL, lPL, lc):
+def compareRightCamAndLeftCam(rPL, lPL, lc, frameWidth):
     # compares the polygon list of both right and left cameras, and uses it to judge where the CAV is in relation to the road   
     # adds/removes 30 pixels to the lane center in order to help rebalance 
     # rPL = right Polygon List
     # lPL = left Polygon List 
     # lc  = lane Center 
-    # IF X AVG OF rPL ~= lPl (moe of 99) then we are in the centre of the frame 
-    pass 
+    # IF X AVG OF rPL ~= lPl (moe of 75 pix) then we are in the centre of the frame 
+    rAvg = getXAvg(rPL)
+    lAvg = getXAvg(lPL)
+    lAvg = frameWidth - lAvg #swap it over
+    print("r mean", rAvg, "l mena", lAvg)
+    if(rAvg - 75 >= lAvg): #heavily right favoured
+        lc = lc - 30
+    elif(rAvg + 75 <= lAvg): #heavily left favoured 
+        lc = lc + 30 
+    else: #equal
+        pass #do nothing 
+    return lc
+        
+    
+
+
+def getXAvg(list):
+    #given a list of coordinates get x average of all coordinates 
+    x_coord = [coordinates[0] for coordinates in list]
+    if x_coord is None:
+        return 0   #Guard Condition TODO: ERR handle
+    midX = sum(x_coord)/len(x_coord)
+    return midX 

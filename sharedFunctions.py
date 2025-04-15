@@ -275,7 +275,7 @@ def getPolygonList(frame, model):
     nFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     results = model(nFrame)
     df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
-    df = rightDf.reset_index() # make sure indexes pair with number of rows
+    df = df.reset_index() # make sure indexes pair with number of rows
     df.iterrows()
     polygonList = usingCSVData(df) 
     return polygonList
