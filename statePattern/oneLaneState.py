@@ -71,6 +71,8 @@ class oneLaneState:
             rPL = sf.getPolygonList(rightFrame, model) 
             lPL = sf.getPolygonList(leftFrame, model)
             laneCenter = compareRightCamAndLeftCam(rPL, lPL, laneCenter, frame.shape[1])
+            rightFrame = sf.overlaySideImage(rPL, rightFrame)
+            leftFrame = sf.overlaySideImage(lPL, leftFrame)
             cv2.imshow("right_cam", rightFrame)
             cv2.imshow("left_cam", leftFrame)
        

@@ -114,7 +114,19 @@ def overlayimage(scale, leftLane, rightLane, laneCenter, image):
     # cv2.circle(overlay, ((int)(laneCenter), (y)), 10, (125, 125, 0), -1)
     # cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0, image) #overlaays the image with the polygon
     return image
-        
+    
+
+def overlaySideImage(list, image):
+    #display every point for side cameras and the x avg
+    alpha = 0.5 #transparency for overlay
+    overlay = image.copy()
+    for x, y in list: 
+        cv2.circle(overlay, (int(x), int(y)), 2, (255, 125, 0), -1)
+        cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0, image) #overlays the image with the polygon
+    # cv2.circle(overlay, ((int)(laneCenter), (240)), 2, (0, 125, 255), -1)
+    # cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0, image) #overlays the image with the polygon
+    return image
+
 def doesLeftOrRightExist(leftLane, rightLane, scale, oldMemory):
     #use lane gradients to determine if a lane exists
     #helps for defining centre and turns
@@ -279,3 +291,7 @@ def getPolygonList(frame, model):
     df.iterrows()
     polygonList = usingCSVData(df) 
     return polygonList
+
+def mapDisplay(leftLane, rightLane, laneCenter):
+    
+    pass
