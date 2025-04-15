@@ -61,7 +61,6 @@ class correctionState:
             #self.idx = 0
             #self.assignPresistentMemory(laneMemory(False,False,[],[]))
         else:
-            
             nFrame = cameras[self.curStream].returnFrame() 
             if nFrame is not None: #if it exists 
                 rFrame = cv2.cvtColor(nFrame, cv2.COLOR_BGR2RGB)

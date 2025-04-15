@@ -176,59 +176,57 @@ def selfDrvieAdapt():
             #     break #bad practice to have a break here, this however is the only remaining line from when I used chatgpt as a point of reference
             
             frame = cameras[0].returnFrame()
-            if frame_count % 3 == 0: ####Say the fps is 30, runs ten times a second 
-                
-                if firstFrame:
-                    midX = int((frame.shape[1])/2)
-                    firstFrame = False
-                    laneCenter = midX
-                    scale = sf.calcScale(midX)
-                    newMemory = laneMemory(False,False,[],[])
-              
-                #Convert each frame into RBG
-                print("State: ", laneState.getState())
-                rFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                results = model(rFrame)
-                results.print() #prints to terminal (optional)
-                #results.save() #saves the image to an exp file (optional)
-                #results.xyxy[0]  # im redictions (tensor) 
+            if firstFrame:
+                midX = int((frame.shape[1])/2)
+                firstFrame = False
+                laneCenter = midX
+                scale = sf.calcScale(midX)
+                newMemory = laneMemory(False,False,[],[])
             
-                df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
-                df = df.reset_index() # make sure indexes pair with number of rows
-                df.iterrows()
-                laneCenter, newMemory = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
-                if cv2.waitKey(1) == ord('q'):#diplays the image  a set amount of time 
-                    break
+            #Convert each frame into RBG
+            print("State: ", laneState.getState())
+            rFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            results = model(rFrame)
+            #results.print() #prints to terminal (optional)
+            #results.save() #saves the image to an exp file (optional)
+            #results.xyxy[0]  # im redictions (tensor) 
+        
+            df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
+            df = df.reset_index() # make sure indexes pair with number of rows
+            df.iterrows()
+            laneCenter, newMemory = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
+            if cv2.waitKey(1) == ord('q'):#diplays the image  a set amount of time 
+                break
 
-                if frame_count > 10:
-                    previousCommand = command
-                    error = midX - laneCenter
-                    steering_adjustment = pid.update(error, 0.1/frame_rate)
-                    angle = 90 + (steering_adjustment * (-0.5)) 
-                    if newMemory.leftExist or newMemory.rightExist:
-                        command = 'F'
-                        print("Forward Sent")
-                    else:
-                        command = 'S'
-                        print("stop Sent")
-                    ##Creating processes 
-                    if(previousCommand != command): #to handle buffer
-                        commandQueue.put(command)
-                        
-                    clip_angle = max(20, min(160, angle))
-                    if 20 <= clip_angle <= 160: #change 30 and 160 to 20 and 160 respectively
-                        duty_cycle = angleToDutyCycle(clip_angle)
-                        print(f'duty cycle: {duty_cycle}, clipped angle: {clip_angle}')
-                    elif 0 <= clip_angle < 20: #new addition, covering cases that were generalised into else, hope this helps
-                        duty_cycle = angleToDutyCycle(20)  #left
-                        print("HARD LEFT -- Duty Cycle: {duty_cycle}  Clip Angle: {clip_angle}")
-                    elif 160 <= clip_angle <= 180: #right
-                        duty_cycle = angleToDutyCycle(160)
-                        print("HARD RIGHT-- Duty Cycle: {duty_cycle}  Clip Angle: {clip_angle}")
-                    else:
-                        duty_cycle = angleToDutyCycle(90.01)
-                    angleQueue.put(duty_cycle)     
-            frame_count += 1
+            if frame_count > 10:
+                previousCommand = command
+                error = midX - laneCenter
+                steering_adjustment = pid.update(error, 0.1/frame_rate)
+                angle = 90 + (steering_adjustment * (-0.5)) 
+                if newMemory.leftExist or newMemory.rightExist:
+                    command = 'F'
+                    print("Forward Sent")
+                else:
+                    command = 'S'
+                    print("stop Sent")
+                ##Creating processes 
+                if(previousCommand != command): #to handle buffer
+                    commandQueue.put(command)
+                    
+                clip_angle = max(20, min(160, angle))
+                if 20 <= clip_angle <= 160: #change 30 and 160 to 20 and 160 respectively
+                    duty_cycle = angleToDutyCycle(clip_angle)
+                    print(f'duty cycle: {duty_cycle}, clipped angle: {clip_angle}')
+                elif 0 <= clip_angle < 20: #new addition, covering cases that were generalised into else, hope this helps
+                    duty_cycle = angleToDutyCycle(20)  #left
+                    print("HARD LEFT -- Duty Cycle: {duty_cycle}  Clip Angle: {clip_angle}")
+                elif 160 <= clip_angle <= 180: #right
+                    duty_cycle = angleToDutyCycle(160)
+                    print("HARD RIGHT-- Duty Cycle: {duty_cycle}  Clip Angle: {clip_angle}")
+                else:
+                    duty_cycle = angleToDutyCycle(90.01)
+                angleQueue.put(duty_cycle)     
+        frame_count += 1
     except KeyboardInterrupt:
         pass
     except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset

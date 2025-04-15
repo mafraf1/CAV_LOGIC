@@ -114,7 +114,19 @@ def overlayimage(scale, leftLane, rightLane, laneCenter, image):
     # cv2.circle(overlay, ((int)(laneCenter), (y)), 10, (125, 125, 0), -1)
     # cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0, image) #overlaays the image with the polygon
     return image
-        
+    
+
+def overlaySideImage(list, image):
+    #display every point for side cameras and the x avg
+    alpha = 0.5 #transparency for overlay
+    overlay = image.copy()
+    for x, y in list: 
+        cv2.circle(overlay, (int(x), int(y)), 2, (255, 125, 0), -1)
+        cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0, image) #overlays the image with the polygon
+    # cv2.circle(overlay, ((int)(laneCenter), (240)), 2, (0, 125, 255), -1)
+    # cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0, image) #overlays the image with the polygon
+    return image
+
 def doesLeftOrRightExist(leftLane, rightLane, scale, oldMemory):
     #use lane gradients to determine if a lane exists
     #helps for defining centre and turns
@@ -193,7 +205,7 @@ def splitLaneByImg(coordList, midX, scale):
         return []
     #define midx as the average (mean) of the coordlist x coordinates 
     x_coord = [coordinates[0] for coordinates in coordList]
-    if x_coord is None:
+    if x_coord is None or len(x_coord) == 0:
         return []  #Guard Condition 2 
     midX = sum(x_coord)/len(x_coord)
     for point in coordList:
@@ -267,3 +279,20 @@ def marginOfError(scale, laneCenter, midX):
     else:
         margin = midX
     return margin
+
+
+def getPolygonList(frame, model):
+    #to reduce code dupe 
+    #process a frame and returns a list of points 
+    nFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = model(nFrame)
+    df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
+    df = df.reset_index() # make sure indexes pair with number of rows
+    df.iterrows()
+    polygonList = usingCSVData(df) 
+    polygonList = [coordinates for coordinates in polygonList if coordinates[1] > 300] #filtering the list
+    return polygonList
+
+def mapDisplay(leftLane, rightLane, laneCenter):
+    
+    pass

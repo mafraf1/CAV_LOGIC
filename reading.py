@@ -161,21 +161,23 @@ def processEachFrame():
             oldMemory = newMemory
             detections += 1 #used for lane weighting 
             if frame is None: 
-                raise CameraStreamError("Camera Stream is null")#raise error
-            rFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            results = model(rFrame)
-            df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
-            df = df.reset_index() # make sure indexes pair with number of rows
-            df.iterrows()
-            laneCenter, newMemory = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
-            print("Current State: ", laneState.getState())         
-            if cv2.waitKey(1) == ord('q'):#diplays the image for a set amount of time 
-                break
-            frame_count += 1
-            if(detections >= 3): 
-                    newMemory = laneMemory(oldMemory.leftExist, oldMemory.rightExist, [], [])
-                    detections = 0
-            ### ### ### ### ### ### ### ### ###
+                pass
+                # raise CameraStreamError("Camera Stream is null")#raise error
+            else:
+                rFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                results = model(rFrame)
+                df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
+                df = df.reset_index() # make sure indexes pair with number of rows
+                df.iterrows()
+                laneCenter, newMemory = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
+                print("Current State: ", laneState.getState())         
+                if cv2.waitKey(1) == ord('q'):#diplays the image for a set amount of time 
+                    break
+                frame_count += 1
+                if(detections >= 3): 
+                        newMemory = laneMemory(oldMemory.leftExist, oldMemory.rightExist, [], [])
+                        detections = 0
+                ### ### ### ### ### ### ### ### ###
     except KeyboardInterrupt:
         pass 
     # except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
