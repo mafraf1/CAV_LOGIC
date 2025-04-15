@@ -68,8 +68,8 @@ class oneLaneState:
         rightFrame = cameras[1].returnFrame()  # one = right, 2 = left
         leftFrame = cameras[2].returnFrame()
         if (rightFrame is not None and leftFrame is not None) : #if it exists 
-            rPL = sf.getPolygonList(rightFrame) 
-            lPL = sf.getPolygonList(leftFrame)
+            rPL = sf.getPolygonList(rightFrame, model) 
+            lPL = sf.getPolygonList(leftFrame, model)
            
 
             cv2.imshow("right_cam", rightFrame)
