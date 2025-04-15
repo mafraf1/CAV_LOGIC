@@ -146,7 +146,7 @@ def doesLeftOrRightExist(leftLane, rightLane, scale, oldMemory):
         #this distance checking grabs the minimum distance between all points of both lanes
         #it works but if there are many many points in the definition it will run gradually slower as it needs to sort through
         #what is effectively a 2d array
-        if (min < 270 * scale):
+        if (min < 390 * scale):
             if oldMemory.leftExist == True and oldMemory.rightExist == False and 0 > lineOfBest(leftLane + rightLane): #turning right 
                 leftExist = True
                 rightExist = False
@@ -157,6 +157,7 @@ def doesLeftOrRightExist(leftLane, rightLane, scale, oldMemory):
                 leftExist = False
                 rightLane.extend(leftLane)
                 leftLane.clear() 
+        
                     
     newMemory = laneMemory(leftExist, rightExist, leftLane, rightLane)
     #DEBUG print("LE ", leftExist, "\nRE ", rightExist, "\nLL: ", leftLane, "\nRR: ",rightLane, "\ndist ", dist, "\ngradLeft ", gradLeft, "\ngradRight ", gradRight)
