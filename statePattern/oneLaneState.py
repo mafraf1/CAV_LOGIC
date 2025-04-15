@@ -47,23 +47,19 @@ class oneLaneState:
         leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
         newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
         
-        if newMemory.leftExist == True and newMemory.rightExist == True:
-           
+        if newMemory.leftExist == True and newMemory.rightExist == True: #two lane exit
             self.changeStateTwoLane() 
-            print("THIS FUNCTION IS STILL")
-            #self.assignPresistentMemory(laneMemory(False,False,[],[])
-        elif self.idx > (15): #switches over after 15 detections 
+        elif self.idx > (15) and (laneCenter >= 3*frame.shape[1]/8 and laneCenter <= 5*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
             #makes sure Correction state is correctly defined 
             leftLane, rightLane = self.defineList(leftLane + rightLane)
-            print("LL: ", newMemory.leftExist, "RL: ", newMemory.rightExist)
+            #print("LL: ", newMemory.leftExist, "RL: ", newMemory.rightExist)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
             self.changeStateCorrection()
-            
-            print("lah", newMemory.leftExist, "bah ", newMemory.rightExist )
+            #print("lah", newMemory.leftExist, "bah ", newMemory.rightExist )
             self.idx = 0
         else:
             leftLane, rightLane = self.defineList(leftLane + rightLane)
-            print("LL: ", newMemory.leftExist, leftLane, "RL: ", newMemory.rightExist, rightLane)
+            #print("LL: ", newMemory.leftExist, leftLane, "RL: ", newMemory.rightExist, rightLane)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
             self.idx = self.idx + 1
 
