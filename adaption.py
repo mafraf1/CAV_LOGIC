@@ -227,11 +227,7 @@ def selfDrvieAdapt():
                         print("HARD RIGHT-- Duty Cycle: {duty_cycle}  Clip Angle: {clip_angle}")
                     else:
                         duty_cycle = angleToDutyCycle(90.01)
-                    angleQueue.put(duty_cycle)
-                   
-                    
-                  
-
+                    angleQueue.put(duty_cycle)     
             frame_count += 1
     except KeyboardInterrupt:
         pass

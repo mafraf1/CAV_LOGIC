@@ -21,6 +21,7 @@ from lanes import *
 from scipy.spatial import distance
 from statePattern import laneController as lc
 import sharedFunctions as sf
+from cavErrors import * 
 def writeToFile(snapString):
     #Call to write to a file  
     #unused 
@@ -128,8 +129,8 @@ def processEachFrame():
     cameras = []
     #init all streams 
     cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid.webm", "One"))
-    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid2.webm", "Two"))
-    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid3.webm", "Three"))
+    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid.webm", "Two"))
+    cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid.webm", "Three"))
     model_name='/home/raf/local/cuda/bin/lb2OO07.pt'
     #load model
     model = torch.hub.load('/home/raf/local/cuda/bin/yolov5', 'custom', source='local', path = model_name, force_reload = True)
@@ -154,11 +155,13 @@ def processEachFrame():
                 scale = sf.calcScale(midX)
                 newMemory = laneMemory(False, False, [], [])
                 detections = 0
-            # if not ret:
+            #if not ret:
             #     break
             ### ###
             oldMemory = newMemory
             detections += 1 #used for lane weighting 
+            if frame is None: 
+                raise CameraStreamError("Camera Stream is null")#raise error
             rFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             results = model(rFrame)
             df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
@@ -175,8 +178,8 @@ def processEachFrame():
             ### ### ### ### ### ### ### ### ###
     except KeyboardInterrupt:
         pass 
-    except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
-        print(f"Immediate stop of function: {e}")
+    # except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
+    #     print(f"Immediate stop of function: {e}")
     #Close
     #capture.release()
     for cam in cameras: 

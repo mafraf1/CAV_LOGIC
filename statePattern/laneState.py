@@ -1,5 +1,4 @@
-
-
+#abstract object
 class laneState: 
     def getState(self):
         return self.getState()

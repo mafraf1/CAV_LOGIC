@@ -1,4 +1,4 @@
-#used to share functionally 
+#used to share functionally and declutter reading.py 
 import cv2
 import pandas as pd
 import numpy as np
@@ -41,7 +41,7 @@ def calcScale(num):
 def minimum(matrix):
     #return the minimum sized number in a array
     min = 9999999999999999 # +ve infinity 
-    for array in matrix:
+    for array in matrix: #O(n^2) Very bad 
         for x in array:
             if (x < min):
                 min = x
@@ -146,7 +146,7 @@ def doesLeftOrRightExist(leftLane, rightLane, scale, oldMemory):
         #this distance checking grabs the minimum distance between all points of both lanes
         #it works but if there are many many points in the definition it will run gradually slower as it needs to sort through
         #what is effectively a 2d array
-        if (min < 270 * scale):
+        if (min < 390 * scale):
             if oldMemory.leftExist == True and oldMemory.rightExist == False and 0 > lineOfBest(leftLane + rightLane): #turning right 
                 leftExist = True
                 rightExist = False
@@ -157,6 +157,7 @@ def doesLeftOrRightExist(leftLane, rightLane, scale, oldMemory):
                 leftExist = False
                 rightLane.extend(leftLane)
                 leftLane.clear() 
+        
                     
     newMemory = laneMemory(leftExist, rightExist, leftLane, rightLane)
     #DEBUG print("LE ", leftExist, "\nRE ", rightExist, "\nLL: ", leftLane, "\nRR: ",rightLane, "\ndist ", dist, "\ngradLeft ", gradLeft, "\ngradRight ", gradRight)
@@ -188,6 +189,13 @@ def splitLaneByImg(coordList, midX, scale):
     rightLane = []
     #DEBUGGING STUFF
     #print("Overall gradient: ", lineOfBest(coordList))
+    if coordList is None: #Guard conditon One
+        return []
+    #define midx as the average (mean) of the coordlist x coordinates 
+    x_coord = [coordinates[0] for coordinates in coordList]
+    if x_coord is None:
+        return []  #Guard Condition 2 
+    midX = sum(x_coord)/len(x_coord)
     for point in coordList:
         x, y = point 
         if x < midX and y > (900*scale): #TOP LEFT IS 0,0 and bottm rught is +ve, +ve
