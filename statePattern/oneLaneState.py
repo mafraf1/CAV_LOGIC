@@ -67,7 +67,7 @@ class oneLaneState:
         
         rightFrame = cameras[1].returnFrame()  # one = right, 2 = left
         leftFrame = cameras[2].returnFrame()
-        if (rightFrame and leftFrame) is not None: #if it exists 
+        if (rightFrame is not None and leftFrame is not None) : #if it exists 
             rPL = sf.getPolygonList(rightFrame) 
             lPL = sf.getPolygonList(leftFrame)
            
