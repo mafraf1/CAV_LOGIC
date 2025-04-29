@@ -2,7 +2,9 @@ import cv2
 import pandas as pd
 import sharedFunctions as sf
 from laneMemory import laneMemory
-
+"""
+USED TO CORRECT LANE DETECTION, WANTS TO REENTER TWO LANE STATE
+"""
 class oneLaneState:
     #initalise lane state 
     def __init__(self, laneState):
@@ -29,6 +31,10 @@ class oneLaneState:
         #self.assignPresistentMemory(laneMemory(False,False,[],[]))
         self.laneState.state = self.laneState.correctionstate
 
+    def changeStateTurning(self):
+        print("Now entering turning state")
+        self.idx = 0
+        self.laneState.state = self.laneState.turningstate
 
     def getState(self):
         return 1
@@ -52,14 +58,12 @@ class oneLaneState:
         
         if newMemory.leftExist == True and newMemory.rightExist == True: #two lane exit
             self.changeStateTwoLane() 
-        # elif self.idx > (15) and (laneCenter >= 3*frame.shape[1]/8 and laneCenter <= 5*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
-        #     #makes sure Correction state is correctly defined 
-        #     leftLane, rightLane = self.defineList(leftLane + rightLane)
-        #     #print("LL: ", newMemory.leftExist, "RL: ", newMemory.rightExist)
-        #     newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
-        #     self.changeStateCorrection()
-        #     #print("lah", newMemory.leftExist, "bah ", newMemory.rightExist )
-        #     self.idx = 0
+        elif self.idx > (15) and (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
+            #makes sure turning state is correctly defined 
+            leftLane, rightLane = self.defineList(leftLane + rightLane)
+            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
+            self.changeStateTurning()
+            self.idx = 0
         else:
             leftLane, rightLane = self.defineList(leftLane + rightLane)
             #print("LL: ", newMemory.leftExist, leftLane, "RL: ", newMemory.rightExist, rightLane)
