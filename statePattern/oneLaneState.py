@@ -52,14 +52,14 @@ class oneLaneState:
         
         if newMemory.leftExist == True and newMemory.rightExist == True: #two lane exit
             self.changeStateTwoLane() 
-        elif self.idx > (15) and (laneCenter >= 3*frame.shape[1]/8 and laneCenter <= 5*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
-            #makes sure Correction state is correctly defined 
-            leftLane, rightLane = self.defineList(leftLane + rightLane)
-            #print("LL: ", newMemory.leftExist, "RL: ", newMemory.rightExist)
-            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
-            self.changeStateCorrection()
-            #print("lah", newMemory.leftExist, "bah ", newMemory.rightExist )
-            self.idx = 0
+        # elif self.idx > (15) and (laneCenter >= 3*frame.shape[1]/8 and laneCenter <= 5*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
+        #     #makes sure Correction state is correctly defined 
+        #     leftLane, rightLane = self.defineList(leftLane + rightLane)
+        #     #print("LL: ", newMemory.leftExist, "RL: ", newMemory.rightExist)
+        #     newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
+        #     self.changeStateCorrection()
+        #     #print("lah", newMemory.leftExist, "bah ", newMemory.rightExist )
+        #     self.idx = 0
         else:
             leftLane, rightLane = self.defineList(leftLane + rightLane)
             #print("LL: ", newMemory.leftExist, leftLane, "RL: ", newMemory.rightExist, rightLane)
@@ -106,9 +106,9 @@ def compareRightCamAndLeftCam(rPL, lPL, lc, frameWidth):
     lAvg = frameWidth - lAvg #swap it over
     print("r mean", rAvg, "l mena", lAvg)
     if(rAvg - 75 >= lAvg): #heavily right favoured
-        lc = lc - 30
+        lc = lc + 100
     elif(rAvg + 75 <= lAvg): #heavily left favoured 
-        lc = lc + 30 
+        lc = lc - 100
     else: #equal
         pass #do nothing 
     return lc
