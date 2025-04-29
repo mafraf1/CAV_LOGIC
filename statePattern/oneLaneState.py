@@ -105,11 +105,11 @@ def compareRightCamAndLeftCam(rPL, lPL, lc, frameWidth):
     lAvg = getXAvg(lPL)
     lAvg = frameWidth - lAvg #swap it over
     print("r mean", rAvg, "l mena", lAvg)
-    if(rAvg - 75 >= lAvg): #heavily right favoured
+    if(rAvg - 75 >= lAvg): #heavily left favoured, so we move right
         lc = lc + 100
-    elif(rAvg + 75 <= lAvg): #heavily left favoured 
+    elif(rAvg + 75 <= lAvg): #heavily right favoured, so we move left
         lc = lc - 100
-    else: #equal
+    else: #equal/neglible 
         pass #do nothing 
     return lc
         
