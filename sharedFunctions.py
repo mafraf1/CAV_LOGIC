@@ -152,24 +152,24 @@ def doesLeftOrRightExist(leftLane, rightLane, scale, oldMemory):
     
     if len(leftLane) >= 1 and len(rightLane) >= 1: #if 0 then line of best calculation will crash when no lines are detected
         #check distance using cdist
-        matrix = distance.cdist(leftLane, rightLane, metric='euclidean')
-        min = minimum(matrix) 
+        # matrix = distance.cdist(leftLane, rightLane, metric='euclidean')
+        # min = minimum(matrix) 
         #we check distance to ensure that the lanes are apporiately separated 
         #this distance checking grabs the minimum distance between all points of both lanes
         #it works but if there are many many points in the definition it will run gradually slower as it needs to sort through
         #what is effectively a 2d array
-        if (min < 390 * scale):
-            if oldMemory.leftExist == True and oldMemory.rightExist == False and 0 > lineOfBest(leftLane + rightLane): #turning right 
-                leftExist = True
-                rightExist = False
-                leftLane.extend(rightLane)
-                rightLane.clear() 
-            elif oldMemory.rightExist == True and oldMemory.leftExist == False and 0 < lineOfBest(leftLane + rightLane): #turning left
-                rightExist = True
-                leftExist = False
-                rightLane.extend(leftLane)
-                leftLane.clear() 
-        
+        # if (min < 390 * scale):
+        if oldMemory.leftExist == True and oldMemory.rightExist == False and 0 > lineOfBest(leftLane + rightLane): #turning right 
+            leftExist = True
+            rightExist = False
+            leftLane.extend(rightLane)
+            rightLane.clear() 
+        elif oldMemory.rightExist == True and oldMemory.leftExist == False and 0 < lineOfBest(leftLane + rightLane): #turning left
+            rightExist = True
+            leftExist = False
+            rightLane.extend(leftLane)
+            leftLane.clear() 
+    
                     
     newMemory = laneMemory(leftExist, rightExist, leftLane, rightLane)
     #DEBUG print("LE ", leftExist, "\nRE ", rightExist, "\nLL: ", leftLane, "\nRR: ",rightLane, "\ndist ", dist, "\ngradLeft ", gradLeft, "\ngradRight ", gradRight)
@@ -202,11 +202,11 @@ def splitLaneByImg(coordList, midX, scale):
     #DEBUGGING STUFF
     #print("Overall gradient: ", lineOfBest(coordList))
     if coordList is None: #Guard conditon One
-        return []
+        return leftLane, rightLane 
     #define midx as the average (mean) of the coordlist x coordinates 
     x_coord = [coordinates[0] for coordinates in coordList]
     if x_coord is None or len(x_coord) == 0:
-        return []  #Guard Condition 2 
+        return leftLane, rightLane #Guard Condition 2 
     midX = sum(x_coord)/len(x_coord)
     for point in coordList:
         x, y = point 
