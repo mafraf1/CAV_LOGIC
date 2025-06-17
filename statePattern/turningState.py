@@ -40,6 +40,7 @@ class turningState:
         newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
         
         if newMemory.leftExist == True and newMemory.rightExist == True: #two lane exit
+            self.idx == 0
             self.changeStateTwoLane() 
         else:
             leftLane, rightLane = self.defineList(leftLane + rightLane)

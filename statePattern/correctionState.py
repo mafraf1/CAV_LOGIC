@@ -32,7 +32,13 @@ class correctionState:
         self.idx = 0
         self.assignPresistentMemory(laneMemory(False,False,[],[]))
         self.laneState.state =  self.laneState.twolanestate
-    
+
+    def changeStateTurning(self):
+        print("State changed to Turning State")
+        self.idx = 0
+        self.assignPresistentMemory(laneMemory(False,False,[],[]))
+        self.laneState.state =  self.laneState.turningstate
+
     def getState(self):
         return 3
     
@@ -42,7 +48,7 @@ class correctionState:
             #First entered state 
             self.assignPresistentMemory(newMemory)
             if self.presistentMemory.leftExist == True: 
-                self.curStream = 1 #Ledt
+                self.curStream = 1 #Left
                 self.othStream = 2 
                 print("Assigned Right Cam")
             else: 
@@ -64,6 +70,12 @@ class correctionState:
             laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
             #self.idx = 0
             #self.assignPresistentMemory(laneMemory(False,False,[],[]))
+        elif self.idx > (15) and (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
+            #makes sure turning state is correctly defined 
+            leftLane, rightLane = self.defineList(leftLane + rightLane)
+            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
+            self.changeStateTurning()
+            self.idx = 0    
         else:
             nFrame = cameras[self.curStream].returnFrame() 
             if nFrame is not None: #if it exists 

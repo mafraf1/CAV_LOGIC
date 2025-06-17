@@ -2,6 +2,7 @@
 #Takes the data points taken from reading.py (functions likely called from reading.py itself) and adapts it into Justin's orginal code 
 
 #using selfDrive.py as a point of reference
+import logging.config
 import time
 import numpy as np
 import cv2
@@ -12,6 +13,9 @@ from reading import *
 import multiprocessing
 from laneMemory import *
 import sharedFunctions as sf
+import logging 
+import logging.config
+
 class PIDController:
     #Ctrl + C  & Ctrl + V
     def __init__(self, kp, ki, kd,integral_limit):
@@ -146,7 +150,7 @@ def selfDrvieAdapt():
     laneState = lc.laneController()
     #load model
     model = torch.hub.load('/home/jetson/CAV-objectDetection/yolov5', 'custom', source='local', path = model_name, force_reload = True)
-    
+    logger.info("Loading TorchHub Model")
     ###### Multiprocessing Shenagans  -- https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
     #Create a manager
     manager = multiprocessing.Manager()
@@ -204,13 +208,15 @@ def selfDrvieAdapt():
                 steering_adjustment = pid.update(error, 0.1/frame_rate)
                 angle = 90 + (steering_adjustment * (-0.5)) 
                 if newMemory.leftExist or newMemory.rightExist:
-                    command = 'F'
-                    print("Forward Sent")
+                    #range is 0 - 100
+                    command = "S15"
+                    print("Forward Sent - 15")
                 else:
-                    command = 'S'
-                    print("stop Sent")
+                    command = "S0"
+                    print("Stop Sent - 0")
                 ##Creating processes 
                 if(previousCommand != command): #to handle buffer
+                    logger.info("Sent %(command)s to ardino")
                     commandQueue.put(command)
                     
                 clip_angle = max(20, min(160, angle))
@@ -225,12 +231,15 @@ def selfDrvieAdapt():
                     print("HARD RIGHT-- Duty Cycle: {duty_cycle}  Clip Angle: {clip_angle}")
                 else:
                     duty_cycle = angleToDutyCycle(90.01)
+                logger.info(f'duty cycle: {duty_cycle}, clipped angle: {clip_angle}')
                 angleQueue.put(duty_cycle)     
         frame_count += 1
     except KeyboardInterrupt:
+        logger.info("Terminating Program")
         pass
     except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
         print(f"Immediate stop of function: {e}")
+        logger.error(f"Immediate stop of function: {e}")
     #Close and release
     commandQueue.put("END")
     angleQueue.put("END")
@@ -245,21 +254,35 @@ def selfDrvieAdapt():
     GPIO.cleanup()
     return 0
 
+#creating and configure a logger
+logging.basicConfig(filename="cav_lanekeeping_%(asctime)s.log",
+                    format='%(asctime)s %(message)s',
+                    filemode='w')
+
+#Creating a logging object
+logger = logging.getLogger()
+
+# Set the threshold of logger to DEBUG
+logger.setLevel(logging.DEBUG)
 
 if __name__ == "__main__":
     # Open serial port
     try:
         ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
+        logger.info("Connected to serial port /dev/ttyACM0")
         GPIO.setwarnings(False)
         time.sleep(2)  # wait for the serial connection to initialize
     except Exception as e:
         print(f"Could not open serial port: {e}")
+        logger.error(f"Could not open serial port: {e}")
         ser = None  # Ensure ser is defined even if the port couldn't be opened
     # Check CUDA availability
     if cv2.cuda.getCudaEnabledDeviceCount() == 0:
         print("CUDA not available - the program requires a GPU with CUDA.")
+        logger.error("CUDA not available - the program requires a GPU with CUDA.")
         exit()  # Exit if CUDA is not available
     print("Serial port is connected and GPU is available")
+    logger.info("Serial port is connected and GPU is available")
     time.sleep(1)
     main()
     print("end")
