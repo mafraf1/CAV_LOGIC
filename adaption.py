@@ -202,7 +202,7 @@ def selfDrvieAdapt(logger):
             laneCenter, newMemory = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
             if cv2.waitKey(1) == ord('q'):#diplays the image  a set amount of time 
                 break
-
+            frame_count += 1
             if frame_count > 10:
                 previousCommand = command
                 error = midX - laneCenter
@@ -210,10 +210,10 @@ def selfDrvieAdapt(logger):
                 angle = 90 + (steering_adjustment * (-0.5)) 
                 if newMemory.leftExist or newMemory.rightExist:
                     #range is 0 - 100
-                    command = "S15"
+                    command = "S15\n"
                     print("Forward Sent - 15")
                 else:
-                    command = "S0"
+                    command = "S0\n"
                     print("Stop Sent - 0")
                 ##Creating processes 
                 if(previousCommand != command): #to handle buffer
@@ -246,7 +246,7 @@ def selfDrvieAdapt(logger):
     angleQueue.put("END")
     p1.join()
     p2.join()
-    send_data('S')
+    send_data("S0\n")
     #capture.release()
     for cam in cameras: 
         cam.closeStream() 
