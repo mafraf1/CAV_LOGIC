@@ -9,6 +9,7 @@ class twoLaneState:
         # self.left = left #Left Lane exists: Boolean
         # self.right = right #Right Lane exists: Boolean
         #BOTH SHOULD BE TRUE 
+        self.speed = "S15\n"
 
     #Change state when only one lane is being detected
     def changeState(self):
@@ -22,7 +23,8 @@ class twoLaneState:
 
     def getState(self):
         return 2
-    
+    def getSpeed(self):
+        return self.speed
     #Follows the original process 
     def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras):
         polygonList = sf.usingCSVData(df)

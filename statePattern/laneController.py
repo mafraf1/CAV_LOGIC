@@ -24,3 +24,7 @@ class laneController:
     #Calls an unique process depending on the state 
     def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras): 
         return self.state.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
+    #Temp: get speed assigned to each state class 
+    def getSpeed(self):
+        return self.state.getSpeed()
+

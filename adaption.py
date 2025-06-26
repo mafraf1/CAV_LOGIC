@@ -147,7 +147,7 @@ def selfDrvieAdapt(logger):
     cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=0)), "Two"))
     cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=1)), "Three"))
     model_name='/home/jetson/CAV-objectDetection/lb2OO07.pt' #manual replace with our current model here 
-    command = 's'
+    command = "s0\n"
     laneState = lc.laneController()
     #load model
     model = torch.hub.load('/home/jetson/CAV-objectDetection/yolov5', 'custom', source='local', path = model_name, force_reload = True)
@@ -210,8 +210,8 @@ def selfDrvieAdapt(logger):
                 angle = 90 + (steering_adjustment * (-0.5)) 
                 if newMemory.leftExist or newMemory.rightExist:
                     #range is 0 - 100
-                    command = "S15\n"
-                    print("Forward Sent - 15")
+                    command = laneState.getSpeed()
+                    print("Forward Sent - ", command)
                 else:
                     command = "S0\n"
                     print("Stop Sent - 0")
@@ -245,14 +245,20 @@ def selfDrvieAdapt(logger):
     commandQueue.put("END")
     angleQueue.put("END")
     p1.join()
+    logger.info("P1 ENDED") 
     p2.join()
+    logger.info("P2 ENDED") 
     send_data("S0\n")
+    logger.info("Sent S0") 
     #capture.release()
     for cam in cameras: 
         cam.closeStream() 
+        logger.info("Cam closed stream") 
     cv2.destroyAllWindows()
     pwm.stop() 
+    logger.info("PWM Stopped") 
     GPIO.cleanup()
+    logger.info("GPIO cleaned up") 
     return 0
 
 #creating and configure a logger

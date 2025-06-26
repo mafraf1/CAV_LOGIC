@@ -12,6 +12,7 @@ class turningState:
         self.laneState = laneState
         self.presistentMemory = laneMemory(False, False,[],[])
         self.idx = 0
+        self.speed = "S13\n"
     
     def assignPresistentMemory(self, newMem):
         self.presistentMemory = newMem
@@ -25,7 +26,8 @@ class turningState:
 
     def getState(self):
         return 4
-    
+    def getSpeed(self):
+        return self.speed
     #an unique proccess that continues to turn for a bit, but if it goes too long enter a search functionality
     def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras):
         if self.idx == 0: 
@@ -33,7 +35,7 @@ class turningState:
             self.assignPresistentMemory(laneMemory(False,False,[],[]))
             self.idx = 1
             self.assignPresistentMemory(newMemory)
-
+        print("PM L:", self.presistentMemory.leftExist, " PM R: ", self.presistentMemory.rightExist)
         polygonList = sf.usingCSVData(df)
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
         leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
@@ -45,7 +47,6 @@ class turningState:
         else:
             leftLane, rightLane = self.defineList(leftLane + rightLane)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
-            self.idx = self.idx + 1
         laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         

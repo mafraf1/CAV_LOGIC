@@ -1,7 +1,4 @@
 
-"""
-UNUSED: IS NOT ENTERED FROM ANY OTHER STATE
-"""
 import cv2
 import pandas as pd
 import sharedFunctions as sf
@@ -19,6 +16,7 @@ class correctionState:
         self.idx = 0
         self.curStream = 0
         self.othStream = 0
+        self.speed = "S13\n"
         # self.left = left #Left Lane exists: Boolean
         # self.right = right #Right Lane exists: Boolean
         # #Ideally one one should ever be true 
@@ -32,23 +30,22 @@ class correctionState:
         self.idx = 0
         self.assignPresistentMemory(laneMemory(False,False,[],[]))
         self.laneState.state =  self.laneState.twolanestate
-
+        
     def changeStateTurning(self):
-        print("State changed to Turning State")
+        print("Now entering turning state")
         self.idx = 0
-        self.assignPresistentMemory(laneMemory(False,False,[],[]))
-        self.laneState.state =  self.laneState.turningstate
-
+        self.laneState.state = self.laneState.turningstate
     def getState(self):
         return 3
-    
+    def getSpeed(self):
+        return self.speed
     #an unique proccess that continues to turn for a bit, but if it goes too long enter a search functionality
     def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras):
         if self.idx == 0: 
             #First entered state 
             self.assignPresistentMemory(newMemory)
             if self.presistentMemory.leftExist == True: 
-                self.curStream = 1 #Left
+                self.curStream = 1 #Ledt
                 self.othStream = 2 
                 print("Assigned Right Cam")
             else: 
@@ -75,7 +72,7 @@ class correctionState:
             leftLane, rightLane = self.defineList(leftLane + rightLane)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
             self.changeStateTurning()
-            self.idx = 0    
+            self.idx = 0
         else:
             nFrame = cameras[self.curStream].returnFrame() 
             if nFrame is not None: #if it exists 
