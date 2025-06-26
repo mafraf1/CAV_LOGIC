@@ -1,3 +1,4 @@
+
 import cv2
 import pandas as pd
 import sharedFunctions as sf
@@ -15,6 +16,7 @@ class correctionState:
         self.idx = 0
         self.curStream = 0
         self.othStream = 0
+        self.speed = "S13\n"
         # self.left = left #Left Lane exists: Boolean
         # self.right = right #Right Lane exists: Boolean
         # #Ideally one one should ever be true 
@@ -28,10 +30,15 @@ class correctionState:
         self.idx = 0
         self.assignPresistentMemory(laneMemory(False,False,[],[]))
         self.laneState.state =  self.laneState.twolanestate
-    
+        
+    def changeStateTurning(self):
+        print("Now entering turning state")
+        self.idx = 0
+        self.laneState.state = self.laneState.turningstate
     def getState(self):
         return 3
-    
+    def getSpeed(self):
+        return self.speed
     #an unique proccess that continues to turn for a bit, but if it goes too long enter a search functionality
     def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras):
         if self.idx == 0: 
@@ -60,6 +67,12 @@ class correctionState:
             laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
             #self.idx = 0
             #self.assignPresistentMemory(laneMemory(False,False,[],[]))
+        elif (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
+            #makes sure turning state is correctly defined 
+            leftLane, rightLane = self.defineList(leftLane + rightLane)
+            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
+            self.changeStateTurning()
+            self.idx = 0
         else:
             nFrame = cameras[self.curStream].returnFrame() 
             if nFrame is not None: #if it exists 

@@ -2,6 +2,7 @@
 #Takes the data points taken from reading.py (functions likely called from reading.py itself) and adapts it into Justin's orginal code 
 
 #using selfDrive.py as a point of reference
+import logging.config
 import time
 import numpy as np
 import cv2
@@ -12,6 +13,10 @@ from reading import *
 import multiprocessing
 from laneMemory import *
 import sharedFunctions as sf
+import logging 
+import logging.config
+from datetime import datetime
+
 class PIDController:
     #Ctrl + C  & Ctrl + V
     def __init__(self, kp, ki, kd,integral_limit):
@@ -34,9 +39,9 @@ class PIDController:
 def angleToDutyCycle(angle):
     return (angle / 180.0) * 10 + 2.5
 
-def main():
+def main(logger):
     #
-    selfDrvieAdapt()
+    selfDrvieAdapt(logger)
 
 def send_data(command):
     #sends data to serial port
@@ -121,7 +126,7 @@ def gstreamer_pipeline(
             display_height,
         )
     )
-def selfDrvieAdapt():
+def selfDrvieAdapt(logger):
     #Define PID Controller 
     pid = PIDController(kp = 0.3, ki = 0.2, kd = 0.0002, integral_limit = 100)
     #
@@ -142,11 +147,11 @@ def selfDrvieAdapt():
     cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=0)), "Two"))
     cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=1)), "Three"))
     model_name='/home/jetson/CAV-objectDetection/lb2OO07.pt' #manual replace with our current model here 
-    command = 's'
+    command = "s0\n"
     laneState = lc.laneController()
     #load model
     model = torch.hub.load('/home/jetson/CAV-objectDetection/yolov5', 'custom', source='local', path = model_name, force_reload = True)
-    
+    logger.info("Loaded TorchHub Model")
     ###### Multiprocessing Shenagans  -- https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
     #Create a manager
     manager = multiprocessing.Manager()
@@ -197,20 +202,22 @@ def selfDrvieAdapt():
             laneCenter, newMemory = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
             if cv2.waitKey(1) == ord('q'):#diplays the image  a set amount of time 
                 break
-
+            frame_count += 1
             if frame_count > 10:
                 previousCommand = command
                 error = midX - laneCenter
                 steering_adjustment = pid.update(error, 0.1/frame_rate)
                 angle = 90 + (steering_adjustment * (-0.5)) 
                 if newMemory.leftExist or newMemory.rightExist:
-                    command = 'F'
-                    print("Forward Sent")
+                    #range is 0 - 100
+                    command = laneState.getSpeed()
+                    print("Forward Sent - ", command)
                 else:
-                    command = 'S'
-                    print("stop Sent")
+                    command = "S0\n"
+                    print("Stop Sent - 0")
                 ##Creating processes 
                 if(previousCommand != command): #to handle buffer
+                    logger.info(f"Sent {command} to ardino")
                     commandQueue.put(command)
                     
                 clip_angle = max(20, min(160, angle))
@@ -219,49 +226,75 @@ def selfDrvieAdapt():
                     print(f'duty cycle: {duty_cycle}, clipped angle: {clip_angle}')
                 elif 0 <= clip_angle < 20: #new addition, covering cases that were generalised into else, hope this helps
                     duty_cycle = angleToDutyCycle(20)  #left
-                    print("HARD LEFT -- Duty Cycle: {duty_cycle}  Clip Angle: {clip_angle}")
+                    print(f"HARD LEFT -- Duty Cycle: {duty_cycle}  Clip Angle: {clip_angle}")
                 elif 160 <= clip_angle <= 180: #right
                     duty_cycle = angleToDutyCycle(160)
-                    print("HARD RIGHT-- Duty Cycle: {duty_cycle}  Clip Angle: {clip_angle}")
+                    print(f"HARD RIGHT-- Duty Cycle: {duty_cycle}  Clip Angle: {clip_angle}")
                 else:
                     duty_cycle = angleToDutyCycle(90.01)
+                logger.info(f"duty cycle: {duty_cycle}, clipped angle: {clip_angle}")
                 angleQueue.put(duty_cycle)     
         frame_count += 1
     except KeyboardInterrupt:
+        logger.info("Politely Terminating Program.") 
         pass
     except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
-        print(f"Immediate stop of function: {e}")
+        print("Immediate stop of function: ", e)
+        logger.error("Immediate stop of function: ", e)
     #Close and release
     commandQueue.put("END")
     angleQueue.put("END")
     p1.join()
+    logger.info("P1 ENDED") 
     p2.join()
-    send_data('S')
+    logger.info("P2 ENDED") 
+    send_data("S0\n")
+    logger.info("Sent S0") 
     #capture.release()
     for cam in cameras: 
         cam.closeStream() 
+        logger.info("Cam closed stream") 
     cv2.destroyAllWindows()
     pwm.stop() 
+    logger.info("PWM Stopped") 
     GPIO.cleanup()
+    logger.info("GPIO cleaned up") 
     return 0
 
+#creating and configure a logger
+currentTime = datetime.now()
+formatedTime = currentTime.strftime("%Y-%m-%d_%H:%M:%S")
+logging.basicConfig(filename="cav_lanekeeping_"+formatedTime+".log",
+                    format='%(asctime)s %(message)s',
+                    filemode='a')
+
+#Creating a logging object
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
+logger = logging.getLogger()
+
+# Set the threshold of logger to DEBUG
+logger.setLevel(logging.INFO)
 
 if __name__ == "__main__":
     # Open serial port
     try:
         ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
+        logger.info("Connected to serial port /dev/ttyACM0")
         GPIO.setwarnings(False)
         time.sleep(2)  # wait for the serial connection to initialize
     except Exception as e:
-        print(f"Could not open serial port: {e}")
+        print("Could not open serial port: ", e)
+        logger.error("Could not open serial port: ", e)
         ser = None  # Ensure ser is defined even if the port couldn't be opened
     # Check CUDA availability
     if cv2.cuda.getCudaEnabledDeviceCount() == 0:
         print("CUDA not available - the program requires a GPU with CUDA.")
+        logger.error("CUDA not available - the program requires a GPU with CUDA.")
         exit()  # Exit if CUDA is not available
     print("Serial port is connected and GPU is available")
+    logger.info("Serial port is connected and GPU is available")
     time.sleep(1)
-    main()
+    main(logger)
     print("end")
     # Close serial if open
     if ser is not None:

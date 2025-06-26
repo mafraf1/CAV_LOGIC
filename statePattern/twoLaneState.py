@@ -9,15 +9,22 @@ class twoLaneState:
         # self.left = left #Left Lane exists: Boolean
         # self.right = right #Right Lane exists: Boolean
         #BOTH SHOULD BE TRUE 
+        self.speed = "S15\n"
 
     #Change state when only one lane is being detected
     def changeState(self):
         print("State changed to one lane")
-        self.laneState.state =  self.laneState.onelanestate
-        
+        self.laneState.state =  self.laneState.correctionstate
+    
+    def changeStateTurning(self):
+        print("Now entering turning state")
+        self.idx = 0
+        self.laneState.state = self.laneState.turningstate
+
     def getState(self):
         return 2
-    
+    def getSpeed(self):
+        return self.speed
     #Follows the original process 
     def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras):
         polygonList = sf.usingCSVData(df)
@@ -29,7 +36,10 @@ class twoLaneState:
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         cv2.imshow("final", newFrame)
         if newMemory.leftExist == False or newMemory.rightExist == False:
-            self.changeState()
+            if (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8):
+                self.changeStateTurning()
+            else:
+                self.changeState()
         return laneCenter, newMemory
     
     def betterSort(self, leftLane, rightLane):
