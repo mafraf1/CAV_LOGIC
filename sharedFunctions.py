@@ -250,6 +250,14 @@ def convertToXList(list):
             xList.append(x)
     return xList
 
+def convertToYList(list):
+    yList = []
+    if(len(list) > 0):
+        for line in list:
+            x, y = line 
+            yList.append(y)
+    return yList
+
 def findLaneCenter(leftLane, rightLane, laneWidth, midX, lastLaneCenter):
     #Justin's code adapted
     #finds lane center 
