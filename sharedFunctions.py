@@ -187,7 +187,7 @@ def sortByDist(givenList,scale):
         groupList.append(ref)
         for point in givenList:
             d = getDist(ref, point)
-            if d < (300*scale): #change distance param here 
+            if d < (600*scale): #change distance param here 
                 #more specifically this says if the point is less than 70 pixels from the last point the append it to the list 
                 groupList.append(point)
             else: 
@@ -236,10 +236,10 @@ def lineOfBest(coordList):
     #find line of best fit
 
     a, b = np.polyfit(x, y, 1)
-    #add points to plot
-    plt.scatter(x, y)
-    #add line of best fit to plot
-    plt.plot(x, a*x+b)
+    # #add points to plot
+    # plt.scatter(x, y)
+    # #add line of best fit to plot
+    # plt.plot(x, a*x+b)
     return a 
 
 def convertToXList(list):
