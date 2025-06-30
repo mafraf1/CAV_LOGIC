@@ -199,18 +199,18 @@ def selfDrvieAdapt(logger):
             df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
             df = df.reset_index() # make sure indexes pair with number of rows
             df.iterrows()
-            laneCenter, newMemory = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
+            laneCenter, newMemory, command = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
             if cv2.waitKey(1) == ord('q'):#diplays the image  a set amount of time 
                 break
             frame_count += 1
             if frame_count > 10:
-                previousCommand = command
+                
                 error = midX - laneCenter
                 steering_adjustment = pid.update(error, 0.1/frame_rate)
                 angle = 90 + (steering_adjustment * (-0.5)) 
                 if newMemory.leftExist or newMemory.rightExist:
                     #range is 0 - 100
-                    command = laneState.getSpeed()
+              
                     print("Forward Sent - ", command)
                 else:
                     command = "S0\n"
@@ -219,7 +219,7 @@ def selfDrvieAdapt(logger):
                 if(previousCommand != command): #to handle buffer
                     logger.info(f"Sent {command} to ardino")
                     commandQueue.put(command)
-                    
+                previousCommand = command  
                 clip_angle = max(20, min(160, angle))
                 if 20 <= clip_angle <= 160: #change 30 and 160 to 20 and 160 respectively
                     duty_cycle = angleToDutyCycle(clip_angle)

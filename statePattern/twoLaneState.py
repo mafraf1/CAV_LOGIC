@@ -33,7 +33,8 @@ class twoLaneState:
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
         leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
         newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
-        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
+        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 600 * scale, midX, laneCenter)
+        command = sp.calc_speed(newMemory.leftLane, newMemory.rightLane, scale)
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         cv2.imshow("final", newFrame)
         if newMemory.leftExist == False or newMemory.rightExist == False:
@@ -41,7 +42,7 @@ class twoLaneState:
                 self.changeStateTurning()
             else:
                 self.changeState()
-        return laneCenter, newMemory
+        return laneCenter, newMemory, command
     
     def betterSort(self, leftLane, rightLane):
         #iterate through list and ensure correct placement 

@@ -5,6 +5,7 @@ import sharedFunctions as sf
 from laneMemory import laneMemory
 from cameraWidget import * 
 from cavErrors import *
+import speed as sp 
 #Enters in after a time limit in oneLaneState
 #the aim is to reposition the CAV into seeing two lanes 
 
@@ -64,7 +65,8 @@ class correctionState:
         
         if newMemory.leftExist == True and newMemory.rightExist == True:
             self.changeStateTwoLane() 
-            laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
+            laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 600 * scale, midX, laneCenter)
+        
             #self.idx = 0
             #self.assignPresistentMemory(laneMemory(False,False,[],[]))
         elif (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
@@ -100,12 +102,12 @@ class correctionState:
                 cv2.imshow("side_cam", nFrame)
             else: #raise an error message 
                 CameraStreamError("Camera Stream is null")#raise error
-    
+        command = sp.calc_speed(newMemory.leftLane, newMemory.rightLane, scale)
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         
         cv2.imshow("final", newFrame)
         print("CS INDEX", self.idx, "PRESISTANT ", self.presistentMemory.leftExist, " ", self.presistentMemory.rightExist)
-        return laneCenter, newMemory
+        return laneCenter, newMemory,command
 
     def defineList(self, polygonList):
         leftLane = []

@@ -169,8 +169,9 @@ def processEachFrame():
                 df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
                 df = df.reset_index() # make sure indexes pair with number of rows
                 df.iterrows()
-                laneCenter, newMemory = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
-                print("Current State: ", laneState.getState())         
+                laneCenter, newMemory, command = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
+                print("Current State: ", laneState.getState())    
+                print(command)     
                 if cv2.waitKey(1) == ord('q'):#diplays the image for a set amount of time 
                     break
                 frame_count += 1

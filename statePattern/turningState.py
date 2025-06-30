@@ -2,6 +2,7 @@ import cv2
 import pandas as pd
 import sharedFunctions as sf
 from laneMemory import laneMemory
+import speed as sp
 """
 OLD ONE LANE STATE
 When turning, keep turning. Exits upon recognising both lanes
@@ -47,11 +48,12 @@ class turningState:
         else:
             leftLane, rightLane = self.defineList(leftLane + rightLane)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
-        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
+        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 600 * scale, midX, laneCenter)
+        command = sp.calc_speed(newMemory.leftLane, newMemory.rightLane, scale)
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         
         cv2.imshow("final", newFrame)
-        return laneCenter, newMemory
+        return laneCenter, newMemory, command
 
     
     def defineList(self, polygonList):
