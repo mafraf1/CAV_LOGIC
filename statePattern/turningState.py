@@ -27,8 +27,10 @@ class turningState:
 
     def getState(self):
         return 4
+    
     def getSpeed(self):
         return self.speed
+    
     #an unique proccess that continues to turn for a bit, but if it goes too long enter a search functionality
     def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras):
         if self.idx == 0: 
