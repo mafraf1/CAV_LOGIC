@@ -65,7 +65,7 @@ class correctionState:
         
         if newMemory.leftExist == True and newMemory.rightExist == True:
             self.changeStateTwoLane() 
-            laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 600 * scale, midX, laneCenter)
+            laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
         
             #self.idx = 0
             #self.assignPresistentMemory(laneMemory(False,False,[],[]))

@@ -211,7 +211,6 @@ def selfDrvieAdapt(logger):
                 angle = 90 + (steering_adjustment * (-0.5)) 
                 if newMemory.leftExist or newMemory.rightExist:
                     #range is 0 - 100
-              
                     print("Forward Sent - ", command)
                 else:
                     command = "S0\n"

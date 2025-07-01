@@ -71,7 +71,7 @@ class oneLaneState:
             #print("LL: ", newMemory.leftExist, leftLane, "RL: ", newMemory.rightExist, rightLane)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
             self.idx = self.idx + 1
-        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 600 * scale, midX, laneCenter)
+        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
         command = sp.calc_speed(newMemory.leftLane, newMemory.rightLane, scale)
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame) 
         rightFrame = cameras[1].returnFrame()  # one = right, 2 = left

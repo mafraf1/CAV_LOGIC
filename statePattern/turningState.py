@@ -50,7 +50,7 @@ class turningState:
         else:
             leftLane, rightLane = self.defineList(leftLane + rightLane)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
-        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 600 * scale, midX, laneCenter)
+        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
         command = sp.calc_speed(newMemory.leftLane, newMemory.rightLane, scale)
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         

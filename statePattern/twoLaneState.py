@@ -33,7 +33,7 @@ class twoLaneState:
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
         leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
         newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
-        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 600 * scale, midX, laneCenter)
+        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
         command = sp.calc_speed(newMemory.leftLane, newMemory.rightLane, scale)
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         cv2.imshow("final", newFrame)
