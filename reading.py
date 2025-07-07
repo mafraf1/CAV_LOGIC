@@ -142,11 +142,6 @@ def processEachFrame():
     #Processing each frame
     try:
         while True:
-    
-        #            for cam in cameras:
-        #             cam.show_frame()
-
-            #ret, frame = capture.retrieve()
             frame = cameras[0].returnFrame()
             if firstFrame:
                 midX = int((frame.shape[1])/2)
