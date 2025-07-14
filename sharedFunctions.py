@@ -150,25 +150,25 @@ def doesLeftOrRightExist(leftLane, rightLane, scale, oldMemory):
     if gradRight > 0: #+ve
         rightExist = True
     
-    # if len(leftLane) >= 1 and len(rightLane) >= 1: #if 0 then line of best calculation will crash when no lines are detected
-    #     #check distance using cdist
-    #     # matrix = distance.cdist(leftLane, rightLane, metric='euclidean')
-    #     # min = minimum(matrix) 
-    #     #we check distance to ensure that the lanes are apporiately separated 
-    #     #this distance checking grabs the minimum distance between all points of both lanes
-    #     #it works but if there are many many points in the definition it will run gradually slower as it needs to sort through
-    #     #what is effectively a 2d array
-    #     # if (min < 390 * scale):
-    #     if oldMemory.leftExist == True and oldMemory.rightExist == False and 0 > lineOfBest(leftLane + rightLane): #turning right 
-    #         leftExist = True
-    #         rightExist = False
-    #         leftLane.extend(rightLane)
-    #         rightLane.clear() 
-    #     elif oldMemory.rightExist == True and oldMemory.leftExist == False and 0 < lineOfBest(leftLane + rightLane): #turning left
-    #         rightExist = True
-    #         leftExist = False
-    #         rightLane.extend(leftLane)
-    #         leftLane.clear() 
+    if len(leftLane) >= 1 and len(rightLane) >= 1: #if 0 then line of best calculation will crash when no lines are detected
+        #check distance using cdist
+        # matrix = distance.cdist(leftLane, rightLane, metric='euclidean')
+        # min = minimum(matrix) 
+        #we check distance to ensure that the lanes are apporiately separated 
+        #this distance checking grabs the minimum distance between all points of both lanes
+        #it works but if there are many many points in the definition it will run gradually slower as it needs to sort through
+        #what is effectively a 2d array
+        # if (min < 390 * scale):
+        if oldMemory.leftExist == True and oldMemory.rightExist == False and 0 > lineOfBest(leftLane + rightLane): #turning right 
+            leftExist = True
+            rightExist = False
+            leftLane.extend(rightLane)
+            rightLane.clear() 
+        elif oldMemory.rightExist == True and oldMemory.leftExist == False and 0 < lineOfBest(leftLane + rightLane): #turning left
+            rightExist = True
+            leftExist = False
+            rightLane.extend(leftLane)
+            leftLane.clear() 
     
                     
     newMemory = laneMemory(leftExist, rightExist, leftLane, rightLane)
