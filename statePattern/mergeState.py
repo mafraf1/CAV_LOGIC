@@ -1,36 +1,38 @@
-import cv2
-import pandas as pd
+#A state to very handle merging in a very basic manner 
+#Will need to use game theory to decide how the CAV will merge into the lane if there are other vehicles 
+import laneMemory 
 import sharedFunctions as sf
-from laneMemory import laneMemory
-import speed as sp
-"""
-OLD ONE LANE STATE
-When turning, keep turning. Exits upon recognising both lanes
-"""
-class turningState:
-    #initalise lane state 
+import speed as sp 
+import cv2
+#HOW WILL WE KNOW WHEN TO MERGE 
+#HOW WILL WE KNOW THAT WE HAVE MERGERD?
+
+class mergeState: 
     def __init__(self, laneState):
         self.laneState = laneState
         self.presistentMemory = laneMemory(False, False,[],[])
         self.idx = 0
-        self.speed = "S13\n"
-    
-    def assignPresistentMemory(self, newMem):
-        self.presistentMemory = newMem
-
-    #change state to two lane state when both lanes are able to be detected
-    def changeStateTwoLane(self):
-        print("State changed to two lanes")
-        self.idx = 0
-        self.laneState.state =  self.laneState.twolanestate
-    
+        self.speed = "S15\n"
+        self.mergeLeft = False 
+        self.mergeRight = False
 
     def getState(self):
-        return 4
+        if self.mergeLeft:
+            return 5
+        elif self.mergeRight:
+            return 6 
+        else:
+            return -2 #error state 
     
     def getSpeed(self):
         return self.speed
     
+    def changeState(self):
+        print("Now entering turning state")
+        self.idx = 0
+        self.laneState.state = self.laneState.turningstate
+    
+
     #an unique proccess that continues to turn for a bit, but if it goes too long enter a search functionality
     def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras):
         if self.idx == 0: 
@@ -56,13 +58,3 @@ class turningState:
         
         cv2.imshow("final", newFrame)
         return laneCenter, newMemory, command
-
-    
-    def defineList(self, polygonList):
-        leftLane = []
-        rightLane = []
-        if self.presistentMemory.leftExist == True:
-            leftLane = polygonList
-        elif self.presistentMemory.rightExist == True:
-            rightLane = polygonList
-        return leftLane, rightLane

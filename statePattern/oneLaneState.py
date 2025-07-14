@@ -2,6 +2,7 @@ import cv2
 import pandas as pd
 import sharedFunctions as sf
 from laneMemory import laneMemory
+import speed as sp
 """
 USED TO CORRECT LANE DETECTION, WANTS TO REENTER TWO LANE STATE
 """
@@ -70,7 +71,8 @@ class oneLaneState:
             #print("LL: ", newMemory.leftExist, leftLane, "RL: ", newMemory.rightExist, rightLane)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
             self.idx = self.idx + 1
-        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 1000 * scale, midX, laneCenter)
+        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
+        command = sp.calc_speed(newMemory.leftLane, newMemory.rightLane, scale)
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame) 
         rightFrame = cameras[1].returnFrame()  # one = right, 2 = left
         leftFrame = cameras[2].returnFrame()
@@ -84,7 +86,7 @@ class oneLaneState:
             cv2.imshow("left_cam", leftFrame)
         cv2.imshow("final", newFrame)
         #print("OLS INDEX ", self.idx, "PRESISTANT ", self.presistentMemory.leftExist, " ", self.presistentMemory.rightExist)
-        return laneCenter, newMemory
+        return laneCenter, newMemory, command
 
     
     def defineList(self, polygonList):
