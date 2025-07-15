@@ -22,6 +22,7 @@ from scipy.spatial import distance
 from statePattern import laneController as lc
 import sharedFunctions as sf
 from cavErrors import * 
+from input import keyboardListener
 def writeToFile(snapString):
     #Call to write to a file  
     #unused 
@@ -140,8 +141,11 @@ def processEachFrame():
     rightLane = []
     laneState = lc.laneController() 
     #Processing each frame
+    condition = True
+    keyboard = keyboardListener()
+    keyboard.initKeyboard() 
     try:
-        while True:
+        while condition:
             frame = cameras[0].returnFrame()
             if firstFrame:
                 midX = int((frame.shape[1])/2)
@@ -174,6 +178,12 @@ def processEachFrame():
                         newMemory = laneMemory(oldMemory.leftExist, oldMemory.rightExist, [], [])
                         detections = 0
                 ### ### ### ### ### ### ### ### ###
+                userInput = keyboard.getLastKey()
+                print("last key", userInput)
+
+                if (userInput == 'q') : #exit condition
+                    print("User entered termination condition") 
+                    condition = False
     except KeyboardInterrupt:
         pass 
     # except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
@@ -183,3 +193,4 @@ def processEachFrame():
     for cam in cameras: 
         cam.closeStream() 
     cv2.destroyAllWindows()
+    keyboard.endKeyboard()

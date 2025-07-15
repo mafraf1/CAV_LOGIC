@@ -85,19 +85,23 @@ def drive(memory, midX, laneCenter, previousCommand,pid, frame_rate, commandQueu
 
 def commandSender(commandQueue):
     #https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
-    while True:
+    condition = True
+    while condition:
         newVal = commandQueue.get() #Block until something is plaves on the queue
         if newVal == "END": #Terminate Queue on this condition
-            break 
-        send_data(newVal)
+            condition = False
+        else:
+            send_data(newVal)
     return 
 def angleSender(angleQueue, pwm):
     #https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
-    while True:
+    condition = True
+    while condition:
         newVal = angleQueue.get() #Block until something is plaves on the queue
         if newVal == "END": #Terminate Queue on this condition
-            break 
-        sendAngle(pwm, newVal)
+            condition = False
+        else:
+            send_data(newVal)
     return 
  
 def gstreamer_pipeline(
@@ -175,8 +179,9 @@ def selfDrvieAdapt(logger):
     detections = 0
     #capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     #Processing each frame
+    condition = True 
     try:
-        while True:
+        while condition:
             # ret, frame = capture.retrieve()
             # if not ret: 
             #     break #bad practice to have a break here, this however is the only remaining line from when I used chatgpt as a point of reference
