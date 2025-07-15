@@ -170,6 +170,8 @@ def doesLeftOrRightExist(leftLane, rightLane, scale, oldMemory):
             rightLane.extend(leftLane)
             leftLane.clear() 
     
+
+
                     
     newMemory = laneMemory(leftExist, rightExist, leftLane, rightLane)
     #DEBUG print("LE ", leftExist, "\nRE ", rightExist, "\nLL: ", leftLane, "\nRR: ",rightLane, "\ndist ", dist, "\ngradLeft ", gradLeft, "\ngradRight ", gradRight)

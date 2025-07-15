@@ -11,12 +11,12 @@ dx = 0
 change = 0.2 
 
 def calc_speed(leftLane, rightLane, scale):
-    command = "S0\n"
+    command = 0
+    if not leftLane and not rightLane :
+        return command
     rightList = []
     leftList = []
     #determine a speed based on how far up the highest point is and whether or not both lanes are detected 
-    if not rightLane and not leftLane:
-        return command
     if rightLane:
         rightList = sf.convertToYList(rightLane)
     if leftLane:
@@ -34,5 +34,5 @@ def calc_speed(leftLane, rightLane, scale):
         speed = MAX_SPEED
     elif speed < MIN_SPEED: 
         speed = MIN_SPEED
-    command = "S" + str(speed) + "\n"
+    command = speed
     return command

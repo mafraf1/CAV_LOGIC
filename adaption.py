@@ -85,23 +85,19 @@ def drive(memory, midX, laneCenter, previousCommand,pid, frame_rate, commandQueu
 
 def commandSender(commandQueue):
     #https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
-    condition = True
-    while condition:
+    while True:
         newVal = commandQueue.get() #Block until something is plaves on the queue
         if newVal == "END": #Terminate Queue on this condition
-            condition = False
-        else:
-            send_data(newVal)
+            break 
+        send_data(newVal)
     return 
 def angleSender(angleQueue, pwm):
     #https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
-    condition = True
-    while condition:
+    while True:
         newVal = angleQueue.get() #Block until something is plaves on the queue
         if newVal == "END": #Terminate Queue on this condition
-            condition = False
-        else:
-            sendAngle(pwm, newVal)
+            break 
+        sendAngle(pwm, newVal)
     return 
  
 def gstreamer_pipeline(
@@ -152,7 +148,7 @@ def selfDrvieAdapt(logger):
     cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=1)), "Three"))
     model_name='/home/jetson/CAV-objectDetection/lb2OO07.pt' #manual replace with our current model here 
     command = "s0\n"
-    previousCommand = "s0\n"
+    previousCommand = 0
     laneState = lc.laneController()
     #load model
     model = torch.hub.load('/home/jetson/CAV-objectDetection/yolov5', 'custom', source='local', path = model_name, force_reload = True)
@@ -177,11 +173,10 @@ def selfDrvieAdapt(logger):
     leftLane = []
     rightLane = []
     detections = 0
-    condition = True
     #capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     #Processing each frame
     try:
-        while condition:
+        while True:
             # ret, frame = capture.retrieve()
             # if not ret: 
             #     break #bad practice to have a break here, this however is the only remaining line from when I used chatgpt as a point of reference
@@ -205,7 +200,7 @@ def selfDrvieAdapt(logger):
             df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
             df = df.reset_index() # make sure indexes pair with number of rows
             df.iterrows()
-            laneCenter, newMemory, command = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
+            laneCenter, newMemory, commandFloat = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
             if cv2.waitKey(1) == ord('q'):#diplays the image  a set amount of time 
                 break
             frame_count += 1
@@ -216,15 +211,17 @@ def selfDrvieAdapt(logger):
                 angle = 90 + (steering_adjustment * (-0.5)) 
                 if newMemory.leftExist or newMemory.rightExist:
                     #range is 0 - 100
+                    command = "S" + str(commandFloat) + "\n"
                     print("Forward Sent - ", command)
                 else:
                     command = "S0\n"
+                    commandFloat = 0 
                     print("Stop Sent - 0")
                 ##Creating processes 
-                if(previousCommand != command): #to handle buffer
+                if(round(previousCommand, 1) != round(commandFloat,1)): #to handle buffer
                     logger.info(f"Sent {command} to ardino")
                     commandQueue.put(command)
-                previousCommand = command  
+                previousCommand = commandFloat  
                 clip_angle = max(20, min(160, angle))
                 if 20 <= clip_angle <= 160: #change 30 and 160 to 20 and 160 respectively
                     duty_cycle = angleToDutyCycle(clip_angle)
@@ -247,6 +244,7 @@ def selfDrvieAdapt(logger):
         print("Immediate stop of function: ", e)
         logger.error("Immediate stop of function: ", e)
     #Close and release
+    
     commandQueue.put("END")
     angleQueue.put("END")
     p1.join()
