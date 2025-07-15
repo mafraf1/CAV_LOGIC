@@ -151,7 +151,7 @@ def selfDrvieAdapt(logger):
     cameras.append(cameraStreamWidget("/dev/video2", "One"))
     cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=0)), "Two"))
     cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=1)), "Three"))
-    model_name='/home/jetson/CAV-objectDetection/lb2OO07.pt' #manual replace with our current model here 
+    model_name='/home/jetson/CAV-objectDetection/bestJul25.pt' #manual replace with our current model here 
     command = "s0\n"
     previousCommand = 0
     laneState = lc.laneController()

@@ -132,7 +132,7 @@ def processEachFrame():
     cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid.webm", "One"))
     cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid.webm", "Two"))
     cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid.webm", "Three"))
-    model_name='/home/raf/local/cuda/bin/lb2OO07.pt'
+    model_name='/home/raf/local/cuda/bin/bestJul25.pt'
     #load model
     model = torch.hub.load('/home/raf/local/cuda/bin/yolov5', 'custom', source='local', path = model_name, force_reload = True)
     firstFrame = True 
