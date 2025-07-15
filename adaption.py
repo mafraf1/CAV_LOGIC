@@ -16,6 +16,7 @@ import sharedFunctions as sf
 import logging 
 import logging.config
 from datetime import datetime
+from input import keyboardListener
 
 class PIDController:
     #Ctrl + C  & Ctrl + V
@@ -180,6 +181,8 @@ def selfDrvieAdapt(logger):
     #capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     #Processing each frame
     condition = True 
+    keyboard = keyboardListener()
+    keyboard.initKeyboard() 
     try:
         while condition:
             # ret, frame = capture.retrieve()
@@ -241,7 +244,13 @@ def selfDrvieAdapt(logger):
                     duty_cycle = angleToDutyCycle(90.01)
                 logger.info(f"duty cycle: {duty_cycle}, clipped angle: {clip_angle}")
                 angleQueue.put(duty_cycle)     
-        frame_count += 1
+            #Handling user input
+            userInput = keyboard.getLastKey()
+            print("last key", userInput)
+
+            if (userInput == 'q') : #exit condition
+                print("User entered termination condition") 
+                condition = False
     except KeyboardInterrupt:
         logger.info("Politely Terminating Program.") 
         pass
@@ -267,6 +276,7 @@ def selfDrvieAdapt(logger):
     logger.info("PWM Stopped") 
     GPIO.cleanup()
     logger.info("GPIO cleaned up") 
+    keyboard.endKeyboard()
     return 0
 
 #creating and configure a logger
