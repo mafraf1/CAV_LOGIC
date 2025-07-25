@@ -192,5 +192,6 @@ def processEachFrame():
     #capture.release()
     for cam in cameras: 
         cam.closeStream() 
-    cv2.destroyAllWindows()
     keyboard.endKeyboard()
+    cv2.destroyAllWindows()
+    

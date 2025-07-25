@@ -6,7 +6,7 @@
 import sharedFunctions as sf
 #CONSTANTS 
 MAX_SPEED = 16 #straight aways with high vision - might be too quick 
-MIN_SPEED = 13 #turning - very slow
+MIN_SPEED = 13.6 #turning - very slow
 dx = 0 
 change = 0.2 
 

@@ -86,23 +86,19 @@ def drive(memory, midX, laneCenter, previousCommand,pid, frame_rate, commandQueu
 
 def commandSender(commandQueue):
     #https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
-    condition = True
-    while condition:
+    while True:
         newVal = commandQueue.get() #Block until something is plaves on the queue
         if newVal == "END": #Terminate Queue on this condition
-            condition = False
-        else:
-            send_data(newVal)
+            break
+        send_data(newVal)
     return 
 def angleSender(angleQueue, pwm):
     #https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
-    condition = True
-    while condition:
+    while True:
         newVal = angleQueue.get() #Block until something is plaves on the queue
         if newVal == "END": #Terminate Queue on this condition
-            condition = False
-        else:
-            send_data(newVal)
+           break
+        sendAngle(pwm, newVal)
     return 
  
 def gstreamer_pipeline(
@@ -246,14 +242,9 @@ def selfDrvieAdapt(logger):
                 angleQueue.put(duty_cycle)     
             #Handling user input
             userInput = keyboard.getLastKey()
-            print("last key", userInput)
-
             if (userInput == 'q') : #exit condition
                 print("User entered termination condition") 
                 condition = False
-    except KeyboardInterrupt:
-        logger.info("Politely Terminating Program.") 
-        pass
     except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
         print("Immediate stop of function: ", e)
         logger.error("Immediate stop of function: ", e)
@@ -277,6 +268,7 @@ def selfDrvieAdapt(logger):
     GPIO.cleanup()
     logger.info("GPIO cleaned up") 
     keyboard.endKeyboard()
+    logger.info("Closed Keyboard")
     return 0
 
 #creating and configure a logger

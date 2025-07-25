@@ -46,7 +46,7 @@ class correctionState:
             #First entered state 
             self.assignPresistentMemory(newMemory)
             if self.presistentMemory.leftExist == True: 
-                self.curStream = 1 #Ledt
+                self.curStream = 1 #Left
                 self.othStream = 2 
                 print("Assigned Right Cam")
             else: 
