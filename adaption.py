@@ -267,6 +267,7 @@ def selfDrvieAdapt(logger):
     logger.info("PWM Stopped") 
     GPIO.cleanup()
     logger.info("GPIO cleaned up") 
+    print("Press 'q' to end.")
     keyboard.endKeyboard()
     logger.info("Closed Keyboard")
     return 0

@@ -16,7 +16,7 @@ TO RUN;
      
      
 TO CANCEL RUN;
-    Keyboard interrupts such as Ctrl + C, Ctrl + Z in terminal 
+    Press 'q' on camera window. Then press 'q' again when requested to finish program.
 
 IMPORTANT:
 At the moment certain conditions are hardcoded. These include:
