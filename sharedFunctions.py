@@ -169,10 +169,6 @@ def doesLeftOrRightExist(leftLane, rightLane, scale, oldMemory):
             leftExist = False
             rightLane.extend(leftLane)
             leftLane.clear() 
-    
-
-
-                    
     newMemory = laneMemory(leftExist, rightExist, leftLane, rightLane)
     #DEBUG print("LE ", leftExist, "\nRE ", rightExist, "\nLL: ", leftLane, "\nRR: ",rightLane, "\ndist ", dist, "\ngradLeft ", gradLeft, "\ngradRight ", gradRight)
     return newMemory
@@ -206,10 +202,10 @@ def splitLaneByImg(coordList, midX, scale):
     if coordList is None: #Guard conditon One
         return leftLane, rightLane 
     #define midx as the average (mean) of the coordlist x coordinates 
-    x_coord = [coordinates[0] for coordinates in coordList]
-    if x_coord is None or len(x_coord) == 0:
-        return leftLane, rightLane #Guard Condition 2 
-    midX = sum(x_coord)/len(x_coord)
+    # x_coord = [coordinates[0] for coordinates in coordList]
+    # if x_coord is None or len(x_coord) == 0:
+    #     return leftLane, rightLane #Guard Condition 2 
+    # midX = sum(x_coord)/len(x_coord)
     for point in coordList:
         x, y = point 
         if x < midX and y > (900*scale): #TOP LEFT IS 0,0 and bottom right is +ve, +ve
@@ -302,7 +298,3 @@ def getPolygonList(frame, model):
     polygonList = usingCSVData(df) 
     polygonList = [coordinates for coordinates in polygonList if coordinates[1] > 300] #filtering the list
     return polygonList
-
-def mapDisplay(leftLane, rightLane, laneCenter):
-    
-    pass

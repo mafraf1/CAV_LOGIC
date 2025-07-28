@@ -29,7 +29,7 @@ class twoLaneState:
     #Follows the original process 
     def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras):
         polygonList = sf.usingCSVData(df)
-        #polygonList = sf.sortByDist(polygonList, scale) #Gets rid of outliers
+        polygonList = sf.sortByDist(polygonList, scale) #Gets rid of outliers
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
         leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
         newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)

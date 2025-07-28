@@ -23,7 +23,7 @@ def calc_speed(leftLane, rightLane, scale):
         leftList = sf.convertToYList(leftLane)
 
     ymax = min(rightList + leftList)
-    print(f"ymax: {ymax} scaled height: {(scale*1080*1.5)}")
+    #print(f"ymax: {ymax} scaled height: {(scale*1080*1.5)}")
     if leftLane and rightLane:
         yfactor = ((scale*1080*1.5) - ymax)/(scale*1080*1.5) #0,0 y increases down, therefore y = size - ymax 
     else:
