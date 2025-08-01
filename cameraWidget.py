@@ -5,7 +5,7 @@
 from threading import Thread
 import cv2
 import time 
-
+from enum import Enum
 class cameraStreamWidget(object):
     def __init__(self, src, frameName):
         #inits object/Widget
@@ -38,7 +38,11 @@ class cameraStreamWidget(object):
     
     def closeStream(self):
         self.capture.release()
-
+class CameraNotation(Enum):
+    CENTER = 0
+    RIGHT = 1
+    LEFT = 2 
+    
 if __name__ == '__main__':
     camera_stream_widget = cameraStreamWidget()
     while True:
