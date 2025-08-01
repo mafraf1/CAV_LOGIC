@@ -23,7 +23,7 @@ class twoLaneState:
         self.laneState.state = self.laneState.turningstate
 
     def getState(self):
-        return 2
+        return "Two Lane State"
     def getSpeed(self):
         return self.speed
     #Follows the original process 

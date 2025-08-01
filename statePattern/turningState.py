@@ -35,7 +35,7 @@ class turningState:
         self.laneState.state =  self.laneState.correctionstate
 
     def getState(self):
-        return 4
+        return "Turning State"
     
     def getSpeed(self):
         return self.speed

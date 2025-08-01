@@ -37,7 +37,7 @@ class correctionState:
         self.idx = 0
         self.laneState.state = self.laneState.turningstate
     def getState(self):
-        return 3
+        return "Correction State"
     def getSpeed(self):
         return self.speed
     #an unique proccess that continues to turn for a bit, but if it goes too long enter a search functionality
@@ -46,7 +46,7 @@ class correctionState:
             #First entered state 
             self.assignPresistentMemory(newMemory)
             if self.presistentMemory.leftExist == True: 
-                self.curStream = 1 #Left
+                self.curStream = 1 #Left #enum? maybe 
                 self.othStream = 2 
                 print("Assigned Right Cam")
             else: 
@@ -80,7 +80,7 @@ class correctionState:
             if nFrame is not None: #if it exists 
                 rFrame = cv2.cvtColor(nFrame, cv2.COLOR_BGR2RGB)
 
-                results = model(nFrame)
+                results = model(rFrame)
                 df2 = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
                 df2 = df2.reset_index() # make sure indexes pair with number of rows
                 df2.iterrows()
