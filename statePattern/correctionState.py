@@ -102,7 +102,8 @@ class correctionState:
                         laneCenter = 3*frame.shape[1]/4 #half right
                     #swap cameras
                     self.swapStreams()
-                cv2.imshow("side_cam", nFrame)
+                sideFrame = sf.overlaySideImage(polygonList2, nFrame)
+                cv2.imshow("side_cam", sideFrame)
             else: #raise an error message 
                 CameraStreamError("Camera Stream is null")#raise error
         command = sp.calc_speed(newMemory.leftLane, newMemory.rightLane, scale)
