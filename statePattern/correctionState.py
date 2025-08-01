@@ -61,14 +61,10 @@ class correctionState:
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
         leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
         newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
+        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
         #Check main camera 
-        
         if newMemory.leftExist == True and newMemory.rightExist == True:
             self.changeStateTwoLane() 
-            laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
-        
-            #self.idx = 0
-            #self.assignPresistentMemory(laneMemory(False,False,[],[]))
         elif (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
             #makes sure turning state is correctly defined 
             leftLane, rightLane = self.defineList(leftLane + rightLane)
