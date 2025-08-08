@@ -5,16 +5,13 @@
 from threading import Thread
 import cv2
 import time 
-
+from enum import Enum 
 class cameraStreamWidget(object):
     def __init__(self, src, frameName):
         #inits object/Widget
-        # if strmr == True: 
-        #     self.capture = cv2.VideoCapture(src,cv2.CAP_GSTREAMER)
-        # else:
         self.capture = cv2.VideoCapture(src)
         self.frameName = frameName 
-        #Start the trhead to begin reading frames from the video/camera stream
+        #Start the thread to begin reading frames from the video/camera stream
         self.thread = Thread(target=self.update,args=())
         self.thread.daemon = True
         self.thread.start() 
@@ -41,6 +38,11 @@ class cameraStreamWidget(object):
     
     def closeStream(self):
         self.capture.release()
+
+class CameraNotation(Enum):
+    CENTER = 0
+    RIGHT = 1
+    LEFT =  2
 
 if __name__ == '__main__':
     camera_stream_widget = cameraStreamWidget()

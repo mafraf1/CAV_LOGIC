@@ -22,6 +22,7 @@ from scipy.spatial import distance
 from statePattern import laneController as lc
 import sharedFunctions as sf
 from cavErrors import * 
+from input import keyboardListener
 def writeToFile(snapString):
     #Call to write to a file  
     #unused 
@@ -131,7 +132,7 @@ def processEachFrame():
     cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid.webm", "One"))
     cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid.webm", "Two"))
     cameras.append(cameraStreamWidget("/home/raf/local/cuda/bin/vivs/vid.webm", "Three"))
-    model_name='/home/raf/local/cuda/bin/lb2OO07.pt'
+    model_name='/home/raf/local/cuda/bin/bestJul25.pt'
     #load model
     model = torch.hub.load('/home/raf/local/cuda/bin/yolov5', 'custom', source='local', path = model_name, force_reload = True)
     firstFrame = True 
@@ -140,8 +141,11 @@ def processEachFrame():
     rightLane = []
     laneState = lc.laneController() 
     #Processing each frame
+    condition = True
+    keyboard = keyboardListener()
+    keyboard.initKeyboard() 
     try:
-        while True:
+        while condition:
             frame = cameras[0].returnFrame()
             if firstFrame:
                 midX = int((frame.shape[1])/2)
@@ -164,6 +168,35 @@ def processEachFrame():
                 df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
                 df = df.reset_index() # make sure indexes pair with number of rows
                 df.iterrows()
+                frame_count += 1
+                # gray = cv2.cvtColor(rFrame,50, 200) -- Canny edge 
+                # edges = cv2.Canny(gray, 50, 200)
+                # lines = cv2.HoughLinesP(edges, 1, np.pi/180, 68, minLineLength=1, maxLineGap=100)
+                # for line in lines: 
+                #     x1, y1, x2, y2 = line[0]
+                #     cv2.line(rFrame, (x1, y1), (x2, y2), (255, 0, 0), 3)
+                # cv2.imshow('lines', rFrame)
+                polygonList = sf.usingCSVData(df)
+                counts, xedges, yedges = np.histogram2d(sf.convertToYList(polygonList), sf.convertToXList(polygonList), bins=540)
+                # plt.scatter(sf.convertToXList(polygonList), sf.convertToYList(polygonList))
+                # plt.show()
+                # plt.imshow(counts)
+                # plt.show
+                #cv2.imshow('lines', counts)
+                # counts = np.array(counts)
+                            
+                # Normalize to 0-255 and convert to uint8 image
+                counts_img = cv2.normalize(counts, None, 0, 255, cv2.NORM_MINMAX)
+                counts_img = counts_img.astype(np.uint8)
+                cv2.imshow('counts', counts_img)
+                # Hough Line Transform
+                lines = cv2.HoughLinesP(counts_img, 1, np.pi/180, 68, minLineLength=10, maxLineGap=250)
+                print(lines)
+                if lines:
+                    for line in lines: 
+                        x1, y1, x2, y2 = line[0]
+                        cv2.line(rFrame, (x1, y1), (x2, y2), (255, 0, 0), 3)
+                cv2.imshow('lines', rFrame)
                 laneCenter, newMemory, command = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
                 print("Current State: ", laneState.getState())    
                 print(command)     
@@ -174,6 +207,12 @@ def processEachFrame():
                         newMemory = laneMemory(oldMemory.leftExist, oldMemory.rightExist, [], [])
                         detections = 0
                 ### ### ### ### ### ### ### ### ###
+                userInput = keyboard.getLastKey()
+                print("last key", userInput)
+
+                if (userInput == 'q') : #exit condition
+                    print("User entered termination condition") 
+                    condition = False
     except KeyboardInterrupt:
         pass 
     # except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
@@ -182,4 +221,6 @@ def processEachFrame():
     #capture.release()
     for cam in cameras: 
         cam.closeStream() 
+    keyboard.endKeyboard()
     cv2.destroyAllWindows()
+    

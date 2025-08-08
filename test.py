@@ -56,5 +56,6 @@ def main():
     # #print("Completed")
     # for cam in cameras:
     #     cam.closeStream() 
+    print("Done")
 main()
 

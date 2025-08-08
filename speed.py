@@ -5,7 +5,7 @@
 # 0,0 top left 
 import sharedFunctions as sf
 #CONSTANTS 
-MAX_SPEED = 16 #straight aways with high vision - might be too quick 
+MAX_SPEED = 15 #straight aways with high vision - might be too quick 
 MIN_SPEED = 13 #turning - very slow
 dx = 0 
 change = 0.2 
@@ -23,7 +23,7 @@ def calc_speed(leftLane, rightLane, scale):
         leftList = sf.convertToYList(leftLane)
 
     ymax = min(rightList + leftList)
-    print(f"ymax: {ymax} scaled height: {(scale*1080*1.5)}")
+    #print(f"ymax: {ymax} scaled height: {(scale*1080*1.5)}")
     if leftLane and rightLane:
         yfactor = ((scale*1080*1.5) - ymax)/(scale*1080*1.5) #0,0 y increases down, therefore y = size - ymax 
     else:

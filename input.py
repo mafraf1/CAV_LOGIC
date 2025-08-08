@@ -15,7 +15,11 @@ class keyboardListener:
             self.lastKey = None
 
     def getLastKey(self):
-        return self.lastKey
+        if self.lastKey is not None: 
+            key = self.lastKey.char
+        else: 
+            key = self.lastKey
+        return key
     
     def initKeyboard(self):
         self.keyboardListener.start()

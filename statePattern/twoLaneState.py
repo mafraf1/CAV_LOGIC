@@ -23,13 +23,13 @@ class twoLaneState:
         self.laneState.state = self.laneState.turningstate
 
     def getState(self):
-        return 2
+        return "Two Lane State"
     def getSpeed(self):
         return self.speed
     #Follows the original process 
     def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras):
         polygonList = sf.usingCSVData(df)
-        #polygonList = sf.sortByDist(polygonList, scale) #Gets rid of outliers
+        polygonList = sf.sortByDist(polygonList, scale) #Gets rid of outliers
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
         leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
         newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
@@ -40,8 +40,8 @@ class twoLaneState:
         if newMemory.leftExist == False or newMemory.rightExist == False:
             if (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8):
                 self.changeStateTurning()
-            else:
-                self.changeState()
+        else:
+            self.changeState()
         return laneCenter, newMemory, command
     
     def betterSort(self, leftLane, rightLane):

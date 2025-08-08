@@ -16,6 +16,7 @@ import sharedFunctions as sf
 import logging 
 import logging.config
 from datetime import datetime
+from input import keyboardListener
 
 class PIDController:
     #Ctrl + C  & Ctrl + V
@@ -83,6 +84,7 @@ def drive(memory, midX, laneCenter, previousCommand,pid, frame_rate, commandQueu
 
     return previousCommand
 
+
 def commandSender(commandQueue):
     #https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
     while True:
@@ -146,7 +148,7 @@ def selfDrvieAdapt(logger):
     cameras.append(cameraStreamWidget("/dev/video2", "One"))
     cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=0)), "Two"))
     cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=1)), "Three"))
-    model_name='/home/jetson/CAV-objectDetection/lb2OO07.pt' #manual replace with our current model here 
+    model_name='/home/jetson/CAV-objectDetection/bestJul25.pt' #manual replace with our current model here 
     command = "s0\n"
     previousCommand = 0
     laneState = lc.laneController()
@@ -161,9 +163,10 @@ def selfDrvieAdapt(logger):
     angleQueue = manager.Queue()
     p1 = multiprocessing.Process(target=commandSender, args=(commandQueue, ))
     p2 = multiprocessing.Process(target=angleSender, args=(angleQueue, pwm, ))
-    p2.start()
     p1.start()
-    videoPath = "/dev/video0"
+    p2.start()
+    
+    #videoPath = "/dev/video0"
     #videoPath = "http://172.25.0.46:9001/camera.cgi" #remoting via vpn 
     
     firstFrame = True
@@ -175,8 +178,11 @@ def selfDrvieAdapt(logger):
     detections = 0
     #capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     #Processing each frame
+    condition = True 
+    keyboard = keyboardListener()
+    keyboard.initKeyboard() 
     try:
-        while True:
+        while condition:
             # ret, frame = capture.retrieve()
             # if not ret: 
             #     break #bad practice to have a break here, this however is the only remaining line from when I used chatgpt as a point of reference
@@ -200,6 +206,22 @@ def selfDrvieAdapt(logger):
             df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
             df = df.reset_index() # make sure indexes pair with number of rows
             df.iterrows()
+            polygonList = sf.usingCSVData(df)
+            counts, xedges, yedges = np.histogram2d(sf.convertToYList(polygonList), sf.convertToXList(polygonList), bins=540)
+            counts_img = cv2.normalize(counts, None, 0, 255, cv2.NORM_MINMAX)
+            counts_img = counts_img.astype(np.uint8)
+            cv2.imshow('counts', counts_img)
+            # Hough Line Transform
+            lines = cv2.HoughLinesP(counts_img, 1, np.pi/180, 68, minLineLength=10, maxLineGap=250)
+            
+            #print(lines)
+
+            #if lines:
+            #    for line in lines: 
+            #        x1, y1, x2, y2 = line[0]
+            #        cv2.line(rFrame, (x1, y1), (x2, y2), (255, 0, 0), 3)
+            #cv2.imshow('lines', rFrame)
+            
             laneCenter, newMemory, commandFloat = laneState.proccess(frame, scale, model, df, midX, laneCenter, newMemory, cameras)
             if cv2.waitKey(1) == ord('q'):#diplays the image  a set amount of time 
                 break
@@ -228,23 +250,31 @@ def selfDrvieAdapt(logger):
                     print(f'duty cycle: {duty_cycle}, clipped angle: {clip_angle}')
                 elif 0 <= clip_angle < 20: #new addition, covering cases that were generalised into else, hope this helps
                     duty_cycle = angleToDutyCycle(20)  #left
-                    print(f"HARD LEFT -- Duty Cycle: {duty_cycle}  Clip Angle: {clip_angle}")
+                    print("HARD LEFT -- Duty Cycle: {duty_cycle}  Clip Angle: {clip_angle}")
                 elif 160 <= clip_angle <= 180: #right
                     duty_cycle = angleToDutyCycle(160)
-                    print(f"HARD RIGHT-- Duty Cycle: {duty_cycle}  Clip Angle: {clip_angle}")
+                    print("HARD RIGHT-- Duty Cycle: {duty_cycle}  Clip Angle: {clip_angle}")
                 else:
                     duty_cycle = angleToDutyCycle(90.01)
-                logger.info(f"duty cycle: {duty_cycle}, clipped angle: {clip_angle}")
-                angleQueue.put(duty_cycle)     
-        frame_count += 1
-    except KeyboardInterrupt:
-        logger.info("Politely Terminating Program.") 
-        pass
+                angleQueue.put(duty_cycle)   
+            #Handling user input
+            userInput = keyboard.getLastKey()
+            if (userInput == 'q') : #exit condition
+                print("User entered termination condition") 
+                condition = False
     except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
         print("Immediate stop of function: ", e)
         logger.error("Immediate stop of function: ", e)
     #Close and release
-    
+    # angle = 160
+    # clip_angle = max(20, min(160, angle))
+    # if 20 <= clip_angle <= 160: #change 30 and 160 to 20 and 160 respectively
+    #     duty_cycle = angleToDutyCycle(clip_angle)
+    #     print(f'duty cycle: {duty_cycle}, clipped angle: {clip_angle}')
+    # else:
+    #     duty_cycle = angleToDutyCycle(90.01)
+    # angleQueue.put(duty_cycle)
+    # time.sleep(5)
     commandQueue.put("END")
     angleQueue.put("END")
     p1.join()
@@ -262,6 +292,9 @@ def selfDrvieAdapt(logger):
     logger.info("PWM Stopped") 
     GPIO.cleanup()
     logger.info("GPIO cleaned up") 
+    print("Press 'q' to end.")
+    keyboard.endKeyboard()
+    logger.info("Closed Keyboard")
     return 0
 
 #creating and configure a logger
