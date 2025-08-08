@@ -15,9 +15,9 @@ class keyboardListener:
             self.lastKey = None
 
     def getLastKey(self):
-        if self.lastKey is not None:
+        if self.lastKey is not None: 
             key = self.lastKey.char
-        else:
+        else: 
             key = self.lastKey
         return key
     

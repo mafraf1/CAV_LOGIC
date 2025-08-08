@@ -9,6 +9,8 @@ import speed as sp
 #Enters in after a time limit in oneLaneState
 #the aim is to reposition the CAV into seeing two lanes 
 
+
+
 class correctionState:
     #initalise lane state 
     def __init__(self, laneState):
@@ -29,13 +31,13 @@ class correctionState:
     def changeStateTwoLane(self):
         print("State changed to two lanes")
         self.idx = 0
-        self.assignPresistentMemory(laneMemory(False,False,[],[]))
         self.laneState.state =  self.laneState.twolanestate
         
     def changeStateTurning(self):
         print("Now entering turning state")
         self.idx = 0
         self.laneState.state = self.laneState.turningstate
+
     def getState(self):
         return "Correction State"
     def getSpeed(self):
@@ -46,7 +48,7 @@ class correctionState:
             #First entered state 
             self.assignPresistentMemory(newMemory)
             if self.presistentMemory.leftExist == True: 
-                self.curStream = CameraNotation.RIGHT.value
+                self.curStream = CameraNotation.RIGHT.value 
                 self.othStream = CameraNotation.LEFT.value
                 print("Assigned Right Cam")
             else: 
@@ -63,6 +65,7 @@ class correctionState:
         newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
         laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
         #Check main camera 
+        
         if newMemory.leftExist == True and newMemory.rightExist == True:
             self.changeStateTwoLane() 
         elif (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
@@ -85,18 +88,18 @@ class correctionState:
                 leftLane, rightLane = self.defineList(leftLane + rightLane)
                 newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
                 print("LL: ", newMemory.leftExist, "RL: ", newMemory.rightExist)
-                #if there are enough detections then turn normally otherwise turn the opposite direction moderately
+                #if there are enough detections then turn normally otherwise turn the opposite direction
                 if len(polygonList2) > 3: # enough detections
-                    if self.presistentMemory.rightExist == True: 
-                        laneCenter = 0 #maxed out left
+                    if self.presistentMemory.rightExist == True:
+                        laneCenter = laneCenter/2 #maxed out left
                     else:
-                        laneCenter = frame.shape[1] #Maxed out right
+                        laneCenter = laneCenter + laneCenter/2 #maxed out right
                 else: 
-                    if self.presistentMemory.leftExist == True: 
-                        laneCenter = frame.shape[1]/4 #half left
+                    if self.presistentMemory.leftExist == True:
+                        laneCenter = laneCenter - frame.shape[1]/4 #half left
                     else:
-                        laneCenter = 3*frame.shape[1]/4 #half right
-                    #swap cameras
+                        laneCenter = laneCenter + frame.shape[1]/4 #half right
+                    #swap cameras 
                     self.swapStreams()
                 sideFrame = sf.overlaySideImage(polygonList2, nFrame)
                 cv2.imshow("side_cam", sideFrame)
@@ -122,6 +125,8 @@ class correctionState:
         dummy = self.othStream
         self.othStream = self.curStream
         self.curStream = dummy
+
+  
     
 def openSideStream(camera_stream):
     #opens the side camera stream as needed 
@@ -132,5 +137,5 @@ def openSideStream(camera_stream):
         raise ValueError(f"Failed to open camera stream: {camera_stream}")
     return capture
 
-  
+
     
