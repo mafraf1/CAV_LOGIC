@@ -24,9 +24,18 @@ class turningState:
         self.idx = 0
         self.laneState.state =  self.laneState.twolanestate
     
+    def changeStateOneLane(self):
+        print("State changed to one lanes")
+        self.idx = 0
+        self.laneState.state =  self.laneState.onelanestate
+
+    def changeStateCorrection(self):
+        print("State changed to Correction")
+        self.idx = 0
+        self.laneState.state =  self.laneState.correctionstate
 
     def getState(self):
-        return 4
+        return "Turning State"
     
     def getSpeed(self):
         return self.speed
@@ -47,6 +56,12 @@ class turningState:
         if newMemory.leftExist == True and newMemory.rightExist == True: #two lane exit
             self.idx == 0
             self.changeStateTwoLane() 
+        elif (laneCenter >= 3*frame.shape[1]/8 and laneCenter <= 5*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
+            #makes sure turning state is correctly defined 
+            leftLane, rightLane = self.defineList(leftLane + rightLane)
+            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
+            self.changeStateCorrection()
+            self.idx = 0
         else:
             leftLane, rightLane = self.defineList(leftLane + rightLane)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)

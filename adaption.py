@@ -89,7 +89,7 @@ def commandSender(commandQueue):
     while True:
         newVal = commandQueue.get() #Block until something is plaves on the queue
         if newVal == "END": #Terminate Queue on this condition
-            break
+            break 
         send_data(newVal)
     return 
 def angleSender(angleQueue, pwm):
@@ -97,7 +97,7 @@ def angleSender(angleQueue, pwm):
     while True:
         newVal = angleQueue.get() #Block until something is plaves on the queue
         if newVal == "END": #Terminate Queue on this condition
-           break
+            break 
         sendAngle(pwm, newVal)
     return 
  
