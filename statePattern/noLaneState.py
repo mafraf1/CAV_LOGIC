@@ -39,30 +39,32 @@ class noLaneState:
         return self.speed
     
     #an unique proccess that continues to turn for a bit, but if it goes too long enter a search functionality
+
+    # CONFIRM NO DETECTIONS 
+    # CHECK BOTH SIDE CAMERAS
+    # CHOOSE THE ONE WITH THE MOST DETECTIONS  
+    # MOVE TOWARDS THAT (at a set speed) SIDE CAMERA UNTIL THE MAIN CAMERA CAN SEE A LANE
+    # IF NOTHING DETECTED REPEAT ELSE CHANGE STATE 
     def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras):
         if self.idx == 0: 
             #First entered state 
-            print("ENTERED ONE LANE REASSIGNMENT")
+            print("ENTERED NO LANE STATE")
             self.assignPresistentMemory(laneMemory(False,False,[],[]))
             self.idx = 1
             self.assignPresistentMemory(newMemory)
         polygonList = sf.usingCSVData(df)
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
-        #TODO FIXERROR HERE
-        #print("pl", polygonList, "margin", margin, "sclae", scale)
         leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
         newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
         if newMemory.leftExist == True and newMemory.rightExist == True: #two lane exit
             self.changeStateTwoLane() 
         elif (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
-            #makes sure turning state is correctly defined 
             leftLane, rightLane = self.defineList(leftLane + rightLane)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
             self.changeStateTurning()
             self.idx = 0
         else:
             leftLane, rightLane = self.defineList(leftLane + rightLane)
-            #print("LL: ", newMemory.leftExist, leftLane, "RL: ", newMemory.rightExist, rightLane)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
             self.idx = self.idx + 1
         laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
@@ -79,5 +81,4 @@ class noLaneState:
             cv2.imshow("right_cam", rightFrame)
             cv2.imshow("left_cam", leftFrame)
         cv2.imshow("final", newFrame)
-        #print("OLS INDEX ", self.idx, "PRESISTANT ", self.presistentMemory.leftExist, " ", self.presistentMemory.rightExist)
         return laneCenter, newMemory, command
