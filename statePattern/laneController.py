@@ -4,6 +4,7 @@ from statePattern import oneLaneState as ols
 from statePattern import twoLaneState as tls
 from statePattern import correctionState as cs
 from statePattern import turningState as ts
+from statePattern import noLaneState as nls 
 class laneController:
 
     def __init__(self):
@@ -11,6 +12,7 @@ class laneController:
         self.twolanestate    = tls.twoLaneState(self)
         self.correctionstate = cs.correctionState(self)
         self.turningstate    = ts.turningState(self)
+        self.nolanestate     = nls.noLaneState(self)
         self.state           = self.twolanestate 
 
     #Change the state of the objects held by lanestat3e
