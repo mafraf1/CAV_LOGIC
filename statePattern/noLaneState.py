@@ -56,12 +56,12 @@ class noLaneState:
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
         leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
         newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
+
         if newMemory.leftExist == True and newMemory.rightExist == True: #two lane exit
             self.changeStateTwoLane() 
-        elif (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
-            leftLane, rightLane = self.defineList(leftLane + rightLane)
+        elif newMemory.leftExist == True or newMemory.rightExist == True and not (newMemory.leftExist == True and newMemory.rightExist == True):
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
-            self.changeStateTurning()
+            self.changeStateCorrection()
             self.idx = 0
         else:
             leftLane, rightLane = self.defineList(leftLane + rightLane)
