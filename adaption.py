@@ -179,8 +179,8 @@ def selfDrvieAdapt(logger):
     #capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     #Processing each frame
     condition = True 
-    keyboard = keyboardListener()
-    keyboard.initKeyboard() 
+    # keyboard = keyboardListener()
+    # keyboard.initKeyboard() 
     try:
         while condition:
             # ret, frame = capture.retrieve()
@@ -258,10 +258,10 @@ def selfDrvieAdapt(logger):
                     duty_cycle = angleToDutyCycle(90.01)
                 angleQueue.put(duty_cycle)   
             #Handling user input
-            userInput = keyboard.getLastKey()
-            if (userInput == 'q') : #exit condition
-                print("User entered termination condition") 
-                condition = False
+            # userInput = keyboard.getLastKey()
+            # if (userInput == 'q') : #exit condition
+            #     print("User entered termination condition") 
+            #     condition = False
     except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
         print("Immediate stop of function: ", e)
         logger.error("Immediate stop of function: ", e)
@@ -292,8 +292,8 @@ def selfDrvieAdapt(logger):
     logger.info("PWM Stopped") 
     GPIO.cleanup()
     logger.info("GPIO cleaned up") 
-    print("Press 'q' to end.")
-    keyboard.endKeyboard()
+    # print("Press 'q' to end.")
+    # keyboard.endKeyboard()
     logger.info("Closed Keyboard")
     return 0
 
