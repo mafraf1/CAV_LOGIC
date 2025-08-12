@@ -111,6 +111,10 @@ def compareLeftRight(cameras, model):
                 leftBias = True
             else:  
                 rightBias = True 
+            rightFrame = sf.overlaySideImage(rPL, rightFrame)
+            leftFrame = sf.overlaySideImage(lPL, leftFrame)
+            cv2.imshow("right_cam", rightFrame)
+            cv2.imshow("left_cam", leftFrame)
     else: 
         CameraStreamError("CRITICAL: Both Camera Streams is null")
     return leftBias, rightBias
