@@ -80,13 +80,16 @@ class noLaneState:
       
             #Lane Center choice based on bias 
             if leftBias:
-                laneCenter = 0 #half left
+                laneCenter = 0 #full left
+                command = self.speed
             elif rightBias:
-                laneCenter = frame.shape[1] #half right 
+                laneCenter = frame.shape[1] #full right 
+                command = self.speed
             else:
                 laneCenter = frame.shape[1]/2 #dead center 
+                command = 0
 
-        command = self.speed
+        
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame) 
        
         cv2.imshow("final", newFrame)
