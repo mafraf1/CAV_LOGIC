@@ -78,13 +78,13 @@ class noLaneState:
                 print("Error accessing side cameras: ", e)
                 CameraStreamError(e) #throw to main loop 
       
-       #Lane Center choice based on bias 
-        if leftBias:
-            laneCenter = 0 #half left
-        elif rightBias:
-            laneCenter = frame.shape[1] #half right 
-        else:
-            laneCenter = frame.shape[1]/2 #dead center 
+            #Lane Center choice based on bias 
+            if leftBias:
+                laneCenter = 0 #half left
+            elif rightBias:
+                laneCenter = frame.shape[1] #half right 
+            else:
+                laneCenter = frame.shape[1]/2 #dead center 
 
         command = self.speed
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame) 
