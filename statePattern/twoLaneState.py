@@ -17,6 +17,11 @@ class twoLaneState:
         print("State changed to one lane")
         self.laneState.state =  self.laneState.correctionstate
     
+    def changeStateNoLanes(self):
+        print("State changed to no lanes")
+        self.idx = 0
+        self.laneState.state =  self.laneState.nolanestate
+
     def changeStateTurning(self):
         print("Now entering turning state")
         self.idx = 0
@@ -40,6 +45,10 @@ class twoLaneState:
         if newMemory.leftExist == False or newMemory.rightExist == False:
             if (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8):
                 self.changeStateTurning()
+            else: 
+                self.changeState()
+        elif newMemory.leftExist == False and newMemory.rightExist == False: 
+            self.changeStateNoLanes()
         else:
             self.changeState()
         return laneCenter, newMemory, command

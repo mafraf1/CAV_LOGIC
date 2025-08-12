@@ -32,6 +32,11 @@ class correctionState:
         print("State changed to two lanes")
         self.idx = 0
         self.laneState.state =  self.laneState.twolanestate
+    
+    def changeStateNoLanes(self):
+        print("State changed to no lanes")
+        self.idx = 0
+        self.laneState.state =  self.laneState.nolanestate
         
     def changeStateTurning(self):
         print("Now entering turning state")
@@ -74,6 +79,8 @@ class correctionState:
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
             self.changeStateTurning()
             self.idx = 0
+        elif newMemory.leftExist == False and newMemory.rightExist == False: 
+            self.changeStateNoLanes()
         else:
             nFrame = cameras[self.curStream].returnFrame() 
             if nFrame is not None: #if it exists 

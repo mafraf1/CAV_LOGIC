@@ -24,6 +24,11 @@ class turningState:
         self.idx = 0
         self.laneState.state =  self.laneState.twolanestate
     
+    def changeStateNoLanes(self):
+        print("State changed to no lanes")
+        self.idx = 0
+        self.laneState.state =  self.laneState.nolanestate
+    
     def changeStateOneLane(self):
         print("State changed to one lanes")
         self.idx = 0
@@ -62,6 +67,8 @@ class turningState:
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
             self.changeStateCorrection()
             self.idx = 0
+        elif newMemory.leftExist == False and newMemory.rightExist == False: 
+            self.changeStateNoLanes()
         else:
             leftLane, rightLane = self.defineList(leftLane + rightLane)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
