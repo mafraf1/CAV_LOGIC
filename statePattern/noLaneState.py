@@ -3,14 +3,15 @@ import pandas as pd
 import sharedFunctions as sf
 from laneMemory import laneMemory
 import speed as sp
-
+from cameraWidget import * 
+from cavErrors import * 
 class noLaneState:
     #initalise lane state 
     def __init__(self, laneState):
         self.laneState = laneState
         self.presistentMemory = laneMemory(False, False,[],[])
         self.idx = 0
-        self.speed = "S13\n"
+        self.speed = 13.5
     
     def assignPresistentMemory(self, newMem):
         self.presistentMemory = newMem
@@ -45,6 +46,11 @@ class noLaneState:
     # CHOOSE THE ONE WITH THE MOST DETECTIONS  
     # MOVE TOWARDS THAT (at a set speed) SIDE CAMERA UNTIL THE MAIN CAMERA CAN SEE A LANE
     # IF NOTHING DETECTED REPEAT ELSE CHANGE STATE 
+
+    # We can afford to be slow ? 
+    # CameraNotation.RIGHT.value 
+    # CameraNotation.LEFT.value
+    
     def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras):
         if self.idx == 0: 
             #First entered state 
@@ -59,26 +65,43 @@ class noLaneState:
 
         if newMemory.leftExist == True and newMemory.rightExist == True: #two lane exit
             self.changeStateTwoLane() 
-        elif newMemory.leftExist == True or newMemory.rightExist == True and not (newMemory.leftExist == True and newMemory.rightExist == True):
+        elif newMemory.leftExist == True or newMemory.rightExist == True and not (newMemory.leftExist == True and newMemory.rightExist == True): #one lane detected exit
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
             self.changeStateCorrection()
-            self.idx = 0
         else:
-            leftLane, rightLane = self.defineList(leftLane + rightLane)
-            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
-            self.idx = self.idx + 1
+            #check both side cameras 
+            try: 
+                leftBias, rightBias = compareLeftRight(cameras, model)
+            except CameraStreamError as e:
+                print("Error accessing side cameras: ", e)
+                CameraStreamError(e) #throw to main loop 
+                
         laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
-        command = sp.calc_speed(newMemory.leftLane, newMemory.rightLane, scale)
+        command = self.speed
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame) 
-        rightFrame = cameras[1].returnFrame()  # one = right, 2 = left
-        leftFrame = cameras[2].returnFrame()
-        if (rightFrame is not None and leftFrame is not None) : #if it exists 
-            rPL = sf.getPolygonList(rightFrame, model) 
-            lPL = sf.getPolygonList(leftFrame, model)
-            laneCenter = compareRightCamAndLeftCam(rPL, lPL, laneCenter, frame.shape[1])
-            rightFrame = sf.overlaySideImage(rPL, rightFrame)
-            leftFrame = sf.overlaySideImage(lPL, leftFrame)
-            cv2.imshow("right_cam", rightFrame)
-            cv2.imshow("left_cam", leftFrame)
+       
         cv2.imshow("final", newFrame)
         return laneCenter, newMemory, command
+    
+def compareLeftRight(cameras, model):
+    #compare detections in both left and right cameras, choose which one has greater value 
+    leftBias = False 
+    rightBias = False
+    rightFrame = cameras[CameraNotation.RIGHT.value].returnFrame()  # one = right, 2 = left
+    leftFrame = cameras[CameraNotation.LEFT.value].returnFrame()
+    if (rightFrame is not None and leftFrame is None): 
+        rightBias = True
+        CameraStreamError("Left Camera Stream is null")
+    elif (leftFrame is not None and rightFrame is None):
+        leftBias = True
+        CameraStreamError("Right Camera Stream is null")
+    elif (rightFrame is not None and leftFrame is not None) : #if it exists 
+            rPL = sf.getPolygonList(rightFrame, model) 
+            lPL = sf.getPolygonList(leftFrame, model)
+            if len(lPL) > len(rPL): #Left Camera has more detections than the left camera 
+                leftBias = True
+            else:  
+                rightBias = True 
+    else: 
+        CameraStreamError("CRITICAL: Both Camera Streams is null")
+    return leftBias, rightBias
