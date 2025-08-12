@@ -65,9 +65,11 @@ class noLaneState:
 
         if newMemory.leftExist == True and newMemory.rightExist == True: #two lane exit
             self.changeStateTwoLane() 
+            laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
         elif newMemory.leftExist == True or newMemory.rightExist == True and not (newMemory.leftExist == True and newMemory.rightExist == True): #one lane detected exit
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
             self.changeStateCorrection()
+            laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
         else:
             #check both side cameras 
             try: 
@@ -75,8 +77,15 @@ class noLaneState:
             except CameraStreamError as e:
                 print("Error accessing side cameras: ", e)
                 CameraStreamError(e) #throw to main loop 
-                
-        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
+      
+       #Lane Center choice based on bias 
+        if leftBias:
+            laneCenter = 0 #half left
+        elif rightBias:
+            laneCenter = frame.shape[1] #half right 
+        else:
+            laneCenter = frame.shape[1]/2 #dead center 
+
         command = self.speed
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame) 
        
