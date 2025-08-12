@@ -231,7 +231,7 @@ def selfDrvieAdapt(logger):
                 error = midX - laneCenter
                 steering_adjustment = pid.update(error, 0.1/frame_rate)
                 angle = 90 + (steering_adjustment * (-0.5)) 
-                if newMemory.leftExist or newMemory.rightExist:
+                if newMemory.leftExist or newMemory.rightExist or laneState.getState() == "No Lane State":
                     #range is 0 - 100
                     command = "S" + str(commandFloat) + "\n"
                     print("Forward Sent - ", command)
