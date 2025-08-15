@@ -71,7 +71,7 @@ class noLaneState:
             self.changeStateCorrection()
             laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
         else:
-            #check both side cameras 
+            #check both side cameras  
             try: 
                 leftBias, rightBias = compareLeftRight(cameras, model)
             except CameraStreamError as e:
