@@ -12,6 +12,8 @@ class noLaneState:
         self.presistentMemory = laneMemory(False, False,[],[])
         self.idx = 0
         self.speed = 13.5
+        self.leftBias = False 
+        self.rightBias = False 
     
     def assignPresistentMemory(self, newMem):
         self.presistentMemory = newMem
@@ -58,6 +60,9 @@ class noLaneState:
             self.assignPresistentMemory(laneMemory(False,False,[],[]))
             self.idx = 1
             self.assignPresistentMemory(newMemory)
+            self.leftBias = False
+            self.rightBias = False 
+        self.idx = self.idx + 1 
         polygonList = sf.usingCSVData(df)
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
         leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
@@ -66,30 +71,30 @@ class noLaneState:
         if newMemory.leftExist == True and newMemory.rightExist == True: #two lane exit
             self.changeStateTwoLane() 
             laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
-        elif newMemory.leftExist == True or newMemory.rightExist == True and not (newMemory.leftExist == True and newMemory.rightExist == True): #one lane detected exit
+        elif newMemory.leftExist == True or newMemory.rightExist == True: #one lane detected exit
             newMemory = laneMemory(newMemory.leftExist, newMemory.rightExist, leftLane, rightLane)
             self.changeStateCorrection()
             laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
         else:
-            #check both side cameras  
-            try: 
-                leftBias, rightBias = compareLeftRight(cameras, model)
+            #check both side cameras 
+            try:
+                if self.idx % 7 == 0 :      
+                    self.leftBias, self.rightBias = compareLeftRight(cameras, model)
+                    self.idx = 1
             except CameraStreamError as e:
                 print("Error accessing side cameras: ", e)
                 CameraStreamError(e) #throw to main loop 
-      
+            
             #Lane Center choice based on bias 
-            if leftBias:
-                laneCenter = 0 #full left
-            elif rightBias:
-                laneCenter = frame.shape[1] #full right 
+            if self.leftBias == True:
+                laneCenter = 0 #half left
+            elif self.rightBias == True:
+                laneCenter = frame.shape[1] #half right 
             else:
                 laneCenter = frame.shape[1]/2 #dead center 
                 command = 0
-
-        
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame) 
-       
+        print("nlr : lc : ", laneCenter, " speed : ", command, " lb : ", self.leftBias, " rb: ", self.rightBias, " idx: ", self.idx)
         cv2.imshow("final", newFrame)
         return laneCenter, newMemory, command
     

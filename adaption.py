@@ -257,7 +257,7 @@ def selfDrvieAdapt(logger):
                 else:
                     duty_cycle = angleToDutyCycle(90.01)
                 angleQueue.put(duty_cycle)   
-            #Handling user input
+            #Handling user input 
             # userInput = keyboard.getLastKey()
             # if (userInput == 'q') : #exit condition
             #     print("User entered termination condition") 
@@ -294,7 +294,7 @@ def selfDrvieAdapt(logger):
     logger.info("GPIO cleaned up") 
     # print("Press 'q' to end.")
     # keyboard.endKeyboard()
-    logger.info("Closed Keyboard")
+    # logger.info("Closed Keyboard")
     return 0
 
 #creating and configure a logger
