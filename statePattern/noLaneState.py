@@ -69,10 +69,11 @@ class noLaneState:
         newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
         command = self.speed
         if newMemory.leftExist == True and newMemory.rightExist == True: #two lane exit
+            newMemory = laneMemory(self.rightBias, self.leftBias, leftLane, rightLane) 
             self.changeStateTwoLane() 
             laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
         elif newMemory.leftExist == True or newMemory.rightExist == True: #one lane detected exit
-            newMemory = laneMemory(newMemory.leftExist, newMemory.rightExist, leftLane, rightLane)
+            newMemory = laneMemory(self.rightBias, self.leftBias, leftLane, rightLane) #set the biases to lane defintion, because the lane it would see first would be opposite of the bias
             self.changeStateCorrection()
             laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
         else:
@@ -93,6 +94,8 @@ class noLaneState:
             else:
                 laneCenter = frame.shape[1]/2 #dead center 
                 command = 0
+            newMemory = laneMemory(self.rightBias, self.leftBias, leftLane, rightLane) 
+            self.assignPresistentMemory(newMemory)
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame) 
         print("nlr : lc : ", laneCenter, " speed : ", command, " lb : ", self.leftBias, " rb: ", self.rightBias, " idx: ", self.idx)
         cv2.imshow("final", newFrame)
