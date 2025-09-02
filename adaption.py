@@ -148,7 +148,7 @@ def selfDrvieAdapt(logger):
     cameras.append(cameraStreamWidget("/dev/video2", "One"))
     cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=0)), "Two"))
     cameras.append(cameraStreamWidget((gstreamer_pipeline(flip_method=0, sensor_id=1)), "Three"))
-    model_name='/home/jetson/CAV-objectDetection/bestJul25.pt' #manual replace with our current model here 
+    model_name='/home/jetson/CAV-objectDetection/August.pt' #manual replace with our current model here 
     command = "s0\n"
     previousCommand = 0
     laneState = lc.laneController()
@@ -212,8 +212,8 @@ def selfDrvieAdapt(logger):
             counts_img = counts_img.astype(np.uint8)
             cv2.imshow('counts', counts_img)
             # Hough Line Transform
-            lines = cv2.HoughLinesP(counts_img, 1, np.pi/180, 68, minLineLength=10, maxLineGap=250)
-            
+            # lines = cv2.HoughLinesP(counts_img, 1, np.pi/180, 68, minLineLength=10, maxLineGap=250)
+        
             #print(lines)
 
             #if lines:
@@ -234,7 +234,7 @@ def selfDrvieAdapt(logger):
                 if newMemory.leftExist or newMemory.rightExist or laneState.getState() == "No Lane State":
                     #range is 0 - 100
                     command = "S" + str(commandFloat) + "\n"
-                    print("Forward Sent - ", command)
+                    print(f"Forward Sent - {command}")
                 else:
                     command = "S0\n"
                     commandFloat = 0 
