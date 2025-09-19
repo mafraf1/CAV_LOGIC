@@ -44,6 +44,12 @@ class twoLaneState:
                 self.changeState()
         return laneCenter, newMemory, command
     
+
+    def _checkCenterAccuracy():
+        #confirm that the center point detected is accurate with previous lane centers and the state it is
+        #Check one frame data 
+        pass
+
     def betterSort(self, leftLane, rightLane):
         #iterate through list and ensure correct placement 
         looping = True 

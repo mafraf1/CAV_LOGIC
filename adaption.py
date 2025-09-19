@@ -188,7 +188,7 @@ def selfDrvieAdapt(logger):
             # ret, frame = capture.retrieve()
             # if not ret: 
             #     break #bad practice to have a break here, this however is the only remaining line from when I used chatgpt as a point of reference
-            
+            tO = time.time()
             frame = cameras[0].returnFrame()
             if firstFrame:
                 midX = int((frame.shape[1])/2)
@@ -266,6 +266,9 @@ def selfDrvieAdapt(logger):
             # if (userInput == 'q') : #exit condition
             #     print("User entered termination condition") 
             #     condition = False
+            t2 = time.time()
+            dt = tO - t2
+            print(f"Time Elasped: {dt}")
     except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
         print("Immediate stop of function: ", e)
         logger.error("Immediate stop of function: ", e)

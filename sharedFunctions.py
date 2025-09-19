@@ -28,7 +28,9 @@ def usingCSVData(dataFrame):
                 yMid = getCord(row["ymin"], row["ymax"])
                 polygonL.append((float(xMid), float(yMid)))
             elif(row["class"] != 0):
-                signList.append(row["class"],getCord(row["xmin"], row["xmax"]), getCord(row["ymin"], row["ymax"]), (row["xmax"]- row["xmin"])), (row["ymax"]- row["ymin"])
+                # class, midx, midy, width, height
+                newList = [row["class"],getCord(row["xmin"], row["xmax"]), getCord(row["ymin"], row["ymax"]), (row["xmax"]- row["xmin"]), (row["ymax"]- row["ymin"])]
+                signList.append(newList)
         return polygonL, signList
         
 def getCord(min, max):
