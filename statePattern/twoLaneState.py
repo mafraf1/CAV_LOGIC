@@ -49,8 +49,7 @@ class twoLaneState:
                 self.changeState()
         elif newMemory.leftExist == False and newMemory.rightExist == False: 
             self.changeStateNoLanes()
-        else:
-            self.changeState()
+
         return laneCenter, newMemory, command
     
     def betterSort(self, leftLane, rightLane):
