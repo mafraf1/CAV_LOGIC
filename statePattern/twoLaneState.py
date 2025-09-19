@@ -40,8 +40,8 @@ class twoLaneState:
         if newMemory.leftExist == False or newMemory.rightExist == False:
             if (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8):
                 self.changeStateTurning()
-        else:
-            self.changeState()
+            else:
+                self.changeState()
         return laneCenter, newMemory, command
     
     def betterSort(self, leftLane, rightLane):
