@@ -17,6 +17,7 @@ import logging
 import logging.config
 from datetime import datetime
 from input import keyboardListener
+from distance_model import load_distance_models
 
 class PIDController:
     #Ctrl + C  & Ctrl + V
@@ -154,6 +155,7 @@ def selfDrvieAdapt(logger):
     laneState = lc.laneController()
     #load model
     model = torch.hub.load('/home/jetson/CAV-objectDetection/yolov5', 'custom', source='local', path = model_name, force_reload = True)
+    distance_predictor = load_distance_models()
     logger.info("Loaded TorchHub Model")
     ###### Multiprocessing Shenagans  -- https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
     #Create a manager
@@ -206,14 +208,16 @@ def selfDrvieAdapt(logger):
             df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
             df = df.reset_index() # make sure indexes pair with number of rows
             df.iterrows()
-            polygonList = sf.usingCSVData(df)
+            polygonList, signList = sf.usingCSVData(df)
             counts, xedges, yedges = np.histogram2d(sf.convertToYList(polygonList), sf.convertToXList(polygonList), bins=540)
             counts_img = cv2.normalize(counts, None, 0, 255, cv2.NORM_MINMAX)
             counts_img = counts_img.astype(np.uint8)
             cv2.imshow('counts', counts_img)
             # Hough Line Transform
             lines = cv2.HoughLinesP(counts_img, 1, np.pi/180, 68, minLineLength=10, maxLineGap=250)
-            
+            if distance_predictor:
+                results = distance_predictor.predict_batch(signList)
+                print(f"Distance Predictions:  {results}")
             #print(lines)
 
             #if lines:

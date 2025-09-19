@@ -41,7 +41,7 @@ class mergeState:
             self.idx = 1
             self.assignPresistentMemory(newMemory)
         print("PM L:", self.presistentMemory.leftExist, " PM R: ", self.presistentMemory.rightExist)
-        polygonList = sf.usingCSVData(df)
+        polygonList, signList = sf.usingCSVData(df)
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
         leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
         newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)

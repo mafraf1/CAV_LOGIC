@@ -52,7 +52,7 @@ class oneLaneState:
             self.assignPresistentMemory(laneMemory(False,False,[],[]))
             self.idx = 1
             self.assignPresistentMemory(newMemory)
-        polygonList = sf.usingCSVData(df)
+        polygonList, signList = sf.usingCSVData(df)
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
         #TODO FIXERROR HERE
         #print("pl", polygonList, "margin", margin, "sclae", scale)
