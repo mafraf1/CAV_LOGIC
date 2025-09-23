@@ -28,6 +28,7 @@ class twoLaneState:
         return self.speed
     #Follows the original process 
     def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras):
+        oldLaneCenter = laneCenter
         polygonList, signList = sf.usingCSVData(df)
         polygonList = sf.sortByDist(polygonList, scale) #Gets rid of outliers
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
@@ -45,9 +46,21 @@ class twoLaneState:
         return laneCenter, newMemory, command
     
 
-    def _checkCenterAccuracy():
+    def _checkCenterAccuracy(laneCenter, oldLaneCenter):
+        
         #confirm that the center point detected is accurate with previous lane centers and the state it is
+        
         #Check one frame data 
+        
+        #How will we confirm that the lane center is good ? 
+        """
+        Lane Center should be:
+            - in between the bounds of the lane detection ? 
+                - both lanes should be detected 
+            - Within the lane center of the previous detection ?  
+        """
+        #What should we do if lane center detected is rejected?? 
+        
         pass
 
     def betterSort(self, leftLane, rightLane):
