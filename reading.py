@@ -152,7 +152,7 @@ def processEachFrame():
                 firstFrame = False
                 laneCenter = midX
                 scale = sf.calcScale(midX)
-                newMemory = laneMemory(False, False, [], [])
+                newMemory = laneMemory()
                 detections = 0
             #if not ret:
             #     break
@@ -204,7 +204,7 @@ def processEachFrame():
                     break
                 frame_count += 1
                 if(detections >= 3): 
-                        newMemory = laneMemory(oldMemory.leftExist, oldMemory.rightExist, [], [])
+                        newMemory = laneMemory(oldMemory.leftExist, oldMemory.rightExist, [], [], [])
                         detections = 0
                 ### ### ### ### ### ### ### ### ###
                 userInput = keyboard.getLastKey()

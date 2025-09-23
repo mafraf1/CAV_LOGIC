@@ -195,7 +195,7 @@ def selfDrvieAdapt(logger):
                 firstFrame = False
                 laneCenter = midX
                 scale = sf.calcScale(midX)
-                newMemory = laneMemory(False,False,[],[])
+                newMemory = laneMemory()
             
             #Convert each frame into RBG
             print("State: ", laneState.getState())
