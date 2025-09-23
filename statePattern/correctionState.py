@@ -83,7 +83,7 @@ class correctionState:
                 df2 = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
                 df2 = df2.reset_index() # make sure indexes pair with number of rows
                 df2.iterrows()
-                polygonList2 = sf.usingCSVData(df2)
+                polygonList2, uu = sf.usingCSVData(df2)
                 
                 leftLane, rightLane = self.defineList(leftLane + rightLane)
                 newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
