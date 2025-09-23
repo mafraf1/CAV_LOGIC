@@ -10,7 +10,7 @@ class oneLaneState:
     #initalise lane state 
     def __init__(self, laneState):
         self.laneState = laneState
-        self.presistentMemory = laneMemory(False, False,[],[])
+        self.presistentMemory = laneMemory()
         self.idx = 0
         self.speed = "S14\n"
         # self.left = left #Left Lane exists: Boolean
@@ -49,10 +49,10 @@ class oneLaneState:
         if self.idx == 0: 
             #First entered state 
             print("ENTERED ONE LANE REASSIGNMENT")
-            self.assignPresistentMemory(laneMemory(False,False,[],[]))
+            self.assignPresistentMemory(laneMemory())
             self.idx = 1
             self.assignPresistentMemory(newMemory)
-        polygonList = sf.usingCSVData(df)
+        polygonList, signList = sf.usingCSVData(df)
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
         #TODO FIXERROR HERE
         #print("pl", polygonList, "margin", margin, "sclae", scale)
@@ -63,13 +63,13 @@ class oneLaneState:
         elif (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
             #makes sure turning state is correctly defined 
             leftLane, rightLane = self.defineList(leftLane + rightLane)
-            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
+            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane, [])
             self.changeStateTurning()
             self.idx = 0
         else:
             leftLane, rightLane = self.defineList(leftLane + rightLane)
             #print("LL: ", newMemory.leftExist, leftLane, "RL: ", newMemory.rightExist, rightLane)
-            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
+            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane, [])
             self.idx = self.idx + 1
         laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
         command = sp.calc_speed(newMemory.leftLane, newMemory.rightLane, scale)

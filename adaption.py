@@ -17,6 +17,7 @@ import logging
 import logging.config
 from datetime import datetime
 from input import keyboardListener
+from distance_model import load_distance_models
 
 class PIDController:
     #Ctrl + C  & Ctrl + V
@@ -154,6 +155,7 @@ def selfDrvieAdapt(logger):
     laneState = lc.laneController()
     #load model
     model = torch.hub.load('/home/jetson/CAV-objectDetection/yolov5', 'custom', source='local', path = model_name, force_reload = True)
+    distance_predictor = load_distance_models()
     logger.info("Loaded TorchHub Model")
     ###### Multiprocessing Shenagans  -- https://stackoverflow.com/questions/29571671/basic-multiprocessing-with-while-loop
     #Create a manager
@@ -179,21 +181,21 @@ def selfDrvieAdapt(logger):
     #capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     #Processing each frame
     condition = True 
-    keyboard = keyboardListener()
-    keyboard.initKeyboard() 
+    # keyboard = keyboardListener()
+    # keyboard.initKeyboard() 
     try:
         while condition:
             # ret, frame = capture.retrieve()
             # if not ret: 
             #     break #bad practice to have a break here, this however is the only remaining line from when I used chatgpt as a point of reference
-            
+            tO = time.time()
             frame = cameras[0].returnFrame()
             if firstFrame:
                 midX = int((frame.shape[1])/2)
                 firstFrame = False
                 laneCenter = midX
                 scale = sf.calcScale(midX)
-                newMemory = laneMemory(False,False,[],[])
+                newMemory = laneMemory()
             
             #Convert each frame into RBG
             print("State: ", laneState.getState())
@@ -206,14 +208,16 @@ def selfDrvieAdapt(logger):
             df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
             df = df.reset_index() # make sure indexes pair with number of rows
             df.iterrows()
-            polygonList = sf.usingCSVData(df)
+            polygonList, signList = sf.usingCSVData(df)
             counts, xedges, yedges = np.histogram2d(sf.convertToYList(polygonList), sf.convertToXList(polygonList), bins=540)
             counts_img = cv2.normalize(counts, None, 0, 255, cv2.NORM_MINMAX)
             counts_img = counts_img.astype(np.uint8)
             cv2.imshow('counts', counts_img)
             # Hough Line Transform
             lines = cv2.HoughLinesP(counts_img, 1, np.pi/180, 68, minLineLength=10, maxLineGap=250)
-            
+            if distance_predictor:
+                results = distance_predictor.predict_batch(signList)
+                print(f"Distance Predictions:  {results}")
             #print(lines)
 
             #if lines:
@@ -258,10 +262,13 @@ def selfDrvieAdapt(logger):
                     duty_cycle = angleToDutyCycle(90.01)
                 angleQueue.put(duty_cycle)   
             #Handling user input
-            userInput = keyboard.getLastKey()
-            if (userInput == 'q') : #exit condition
-                print("User entered termination condition") 
-                condition = False
+            # userInput = keyboard.getLastKey()
+            # if (userInput == 'q') : #exit condition
+            #     print("User entered termination condition") 
+            #     condition = False
+            t2 = time.time()
+            dt = tO - t2
+            print(f"Time Elasped: {dt}")
     except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
         print("Immediate stop of function: ", e)
         logger.error("Immediate stop of function: ", e)
@@ -292,9 +299,9 @@ def selfDrvieAdapt(logger):
     logger.info("PWM Stopped") 
     GPIO.cleanup()
     logger.info("GPIO cleaned up") 
-    print("Press 'q' to end.")
-    keyboard.endKeyboard()
-    logger.info("Closed Keyboard")
+    # print("Press 'q' to end.")
+    # keyboard.endKeyboard()
+    # logger.info("Closed Keyboard")
     return 0
 
 #creating and configure a logger

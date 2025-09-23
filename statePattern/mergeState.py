@@ -10,7 +10,7 @@ import cv2
 class mergeState: 
     def __init__(self, laneState):
         self.laneState = laneState
-        self.presistentMemory = laneMemory(False, False,[],[])
+        self.presistentMemory = laneMemory()
         self.idx = 0
         self.speed = "S15\n"
         self.mergeLeft = False 
@@ -37,11 +37,11 @@ class mergeState:
     def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras):
         if self.idx == 0: 
             #First entered state 
-            self.assignPresistentMemory(laneMemory(False,False,[],[]))
+            self.assignPresistentMemory(laneMemory())
             self.idx = 1
             self.assignPresistentMemory(newMemory)
         print("PM L:", self.presistentMemory.leftExist, " PM R: ", self.presistentMemory.rightExist)
-        polygonList = sf.usingCSVData(df)
+        polygonList, signList = sf.usingCSVData(df)
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
         leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
         newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
@@ -51,7 +51,7 @@ class mergeState:
             self.changeStateTwoLane() 
         else:
             leftLane, rightLane = self.defineList(leftLane + rightLane)
-            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
+            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane, [])
         laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
         command = sp.calc_speed(newMemory.leftLane, newMemory.rightLane, scale)
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)

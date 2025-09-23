@@ -19,6 +19,7 @@ def usingCSVData(dataFrame):
         #xCentre = [] 
         #yCentre = [] 
         polygonL = [] #list of coordinates, bad naming convention I know
+        signList = []
         for index, row in dataFrame.iterrows():
             #row names ,xmin,ymin,xmax,ymax,confidence,class,name
             if(row["confidence"] >= 0.2 and row["class"] == 0):
@@ -26,7 +27,11 @@ def usingCSVData(dataFrame):
                 xMid = getCord(row["xmin"], row["xmax"])
                 yMid = getCord(row["ymin"], row["ymax"])
                 polygonL.append((float(xMid), float(yMid)))
-        return polygonL
+            elif(row["class"] != 0):
+                # class, midx, midy, width, height
+                newList = [row["class"],getCord(row["xmin"], row["xmax"]), getCord(row["ymin"], row["ymax"]), (row["xmax"]- row["xmin"]), (row["ymax"]- row["ymin"])]
+                signList.append(newList)
+        return polygonL, signList
         
 def getCord(min, max):
     #midpoint formulae 

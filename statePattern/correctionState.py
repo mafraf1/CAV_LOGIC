@@ -15,7 +15,7 @@ class correctionState:
     #initalise lane state 
     def __init__(self, laneState):
         self.laneState = laneState
-        self.presistentMemory = laneMemory(False, False,[],[])
+        self.presistentMemory = laneMemory()
         self.idx = 0
         self.curStream = 0
         self.othStream = 0
@@ -59,7 +59,7 @@ class correctionState:
         
         #CHECK MAIN CAMERA
         #OTHERWISE CHECK OTHER CAMERA
-        polygonList = sf.usingCSVData(df)
+        polygonList, signList = sf.usingCSVData(df)
         margin = sf.marginOfError(scale, laneCenter, midX) #For if the centre of the lane is left or right favoured
         leftLane, rightLane = sf.splitLaneByImg(polygonList, margin, scale) #easiest way to split the list 
         newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
@@ -71,7 +71,7 @@ class correctionState:
         elif (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
             #makes sure turning state is correctly defined 
             leftLane, rightLane = self.defineList(leftLane + rightLane)
-            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
+            newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane,[])
             self.changeStateTurning()
             self.idx = 0
         else:
@@ -83,10 +83,10 @@ class correctionState:
                 df2 = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
                 df2 = df2.reset_index() # make sure indexes pair with number of rows
                 df2.iterrows()
-                polygonList2 = sf.usingCSVData(df2)
+                polygonList2, uu = sf.usingCSVData(df2)
                 
                 leftLane, rightLane = self.defineList(leftLane + rightLane)
-                newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane)
+                newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane, [])
                 print("LL: ", newMemory.leftExist, "RL: ", newMemory.rightExist)
                 #if there are enough detections then turn normally otherwise turn the opposite direction
                 if len(polygonList2) > 3: # enough detections
