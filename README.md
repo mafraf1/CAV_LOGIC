@@ -5,16 +5,16 @@ TO RUN;
         - A pytorch file for lane detection
         - yolov5 in the same directory with detect.py since we use their LLM to train lane detection
         - All files neccessary for a run are: 
-            - all files in the statePattern Folder. -> They handle logic for different driving states the CAV may be in.
-            - adaption.py -> This is the MAIN file that CAV runs off. Handles initilasing of PID, CAMERAS and the YOLOv5 model, and contains the main for loop which all logic is held.
-            - cameraWidget.py -> Specifies a camera object and inits each personal thread a camera would run off of.
-            - cavErrors.py -> Customs errors for the CAV.
-            - gstreamerPipeline.py -> Specifies the pycams for setting up a camera object.
-            - laneMemory.py -> An object which holds information relating to the current detection instance. 
-            - reading.py -> needed for local testing. 
-            - sharedFunctions.py -> Contains misc functions used by multiple files. E.g. Functions used by the statePattern.py, adaption.py, and reading.py
-            - speed.py -> contains basic logic for determining the speed the CAV should drive at.
-            - test.py -> a testing file used for testing specific feature or local testing.
+            - all files in the statePattern Folder. -> They handle logic for different driving states the CAV may be in. \n
+            - adaption.py -> This is the MAIN file that CAV runs off. Handles initilasing of PID, CAMERAS and the YOLOv5 model, and contains the main for loop which all logic is held. \n
+            - cameraWidget.py -> Specifies a camera object and inits each personal thread a camera would run off of. \n
+            - cavErrors.py -> Customs errors for the CAV. \n
+            - gstreamerPipeline.py -> Specifies the pycams for setting up a camera object. \n
+            - laneMemory.py -> An object which holds information relating to the current detection instance. \n
+            - reading.py -> needed for local testing. \n
+            - sharedFunctions.py -> Contains misc functions used by multiple files. E.g. Functions used by the statePattern.py, adaption.py, and reading.py \n
+            - speed.py -> contains basic logic for determining the speed the CAV should drive at. \n
+            - test.py -> a testing file used for testing specific feature or local testing. \n
     
     COMMANDS: 
 
