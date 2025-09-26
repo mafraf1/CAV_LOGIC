@@ -28,8 +28,9 @@ TO RUN;
             - speed.py -> contains basic logic for determining the speed the CAV should drive at. 
 
             - test.py -> a testing file used for testing specific feature or local testing. 
+
     
-    COMMANDS: 
+COMMANDS: 
 
     python3.8 adaption.py
      
