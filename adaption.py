@@ -208,16 +208,18 @@ def selfDrvieAdapt(logger):
             df = pd.DataFrame(results.pandas().xyxy[0].sort_values("ymin")) #df = Data Frame, sorts x values left to right (not a perfect solution)
             df = df.reset_index() # make sure indexes pair with number of rows
             df.iterrows()
-            polygonList, signList = sf.usingCSVData(df)
-            counts, xedges, yedges = np.histogram2d(sf.convertToYList(polygonList), sf.convertToXList(polygonList), bins=540)
-            counts_img = cv2.normalize(counts, None, 0, 255, cv2.NORM_MINMAX)
-            counts_img = counts_img.astype(np.uint8)
-            cv2.imshow('counts', counts_img)
-            # Hough Line Transform
-            lines = cv2.HoughLinesP(counts_img, 1, np.pi/180, 68, minLineLength=10, maxLineGap=250)
-            if distance_predictor:
-                results = distance_predictor.predict_batch(signList)
-                print(f"Distance Predictions:  {results}")
+            # commented out below for testing if not wokring just uncomment until you reach the & symbol
+            # polygonList, signList = sf.usingCSVData(df)
+            # counts, xedges, yedges = np.histogram2d(sf.convertToYList(polygonList), sf.convertToXList(polygonList), bins=540)
+            # counts_img = cv2.normalize(counts, None, 0, 255, cv2.NORM_MINMAX)
+            # counts_img = counts_img.astype(np.uint8)
+            # cv2.imshow('counts', counts_img)
+            # # Hough Line Transform
+            # lines = cv2.HoughLinesP(counts_img, 1, np.pi/180, 68, minLineLength=10, maxLineGap=250)
+            # if distance_predictor:
+            #     results = distance_predictor.predict_batch(signList)
+            #     print(f"Distance Predictions:  {results}")
+            # &
             #print(lines)
 
             #if lines:
