@@ -268,9 +268,13 @@ def selfDrvieAdapt(logger):
             # if (userInput == 'q') : #exit condition
             #     print("User entered termination condition") 
             #     condition = False
+
             t2 = time.time()
             dt = tO - t2
             print(f"Time Elasped: {dt}")
+            #Append to data fiel 
+            newLine = pd.DataFrame([[tO,t2,dt,laneState.getState()]], columns=['tO', 't2', 'dt', 'State'])
+            newLine.to_csv('testfile.csv', mode='a', header=False, index=False)
     except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
         print("Immediate stop of function: ", e)
         logger.error("Immediate stop of function: ", e)
