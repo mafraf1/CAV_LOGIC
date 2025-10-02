@@ -23,9 +23,8 @@ Alternatively, if you have a list of detections you can pass in a list of tuples
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
+#import numpy as np
 import os
-from typing import Union, List, Tuple, Optional
 
 class DistanceModelGated(nn.Module):
     """Advanced approach using gating mechanism for distance prediction (for other classes)"""
@@ -111,22 +110,19 @@ class CAVDualDistancePredictor:
     Uses separate models for class 0 and other classes.
     """
     
-    def __init__(self, class0_checkpoint_path: str = 'distance_model_checkpoint_class0_only.pth',
-                 other_classes_checkpoint_path: str = 'distance_model_checkpoint_no_class0.pth',
-                 device: Optional[str] = None):
+    def __init__(self, class0_checkpoint_path='distance_model_checkpoint_class0_only.pth',
+                 other_classes_checkpoint_path='distance_model_checkpoint_no_class0.pth'):
         """
         Initialize the CAV Dual Distance Predictor.
         
         Args:
             class0_checkpoint_path: Path to the trained model checkpoint for class 0
             other_classes_checkpoint_path: Path to the trained model checkpoint for other classes
-            device: Device to run inference on ('cpu', 'cuda', or None for auto-detect)
         """
         self.class0_checkpoint_path = class0_checkpoint_path
         self.other_classes_checkpoint_path = other_classes_checkpoint_path
         self.class0_model = None
         self.other_classes_model = None
-        self.device = self._set_device(device)
         self.class0_loaded = False
         self.other_classes_loaded = False
         self.class0_training_config = None
@@ -136,19 +132,8 @@ class CAVDualDistancePredictor:
         self.IMAGE_WIDTH = 1.0
         self.IMAGE_HEIGHT = 1.0
         self.image_area = self.IMAGE_WIDTH * self.IMAGE_HEIGHT
-        
-    def _set_device(self, device: Optional[str]) -> torch.device:
-        """Set the computation device"""
-        if device is None:
-            # Auto-detect best available device
-            if torch.cuda.is_available():
-                return torch.device('cuda')
-            else:
-                return torch.device('cpu')
-        else:
-            return torch.device(device)
     
-    def load_models(self) -> bool:
+    def load_models(self):
         """
         Load both trained models from checkpoints.
         
@@ -168,14 +153,13 @@ class CAVDualDistancePredictor:
         success = class0_success and other_classes_success
         
         if success:
-            print(f"✓ Both distance models loaded successfully")
-            print(f"  Device: {self.device}")
+            print("✓ Both distance models loaded successfully")
         else:
-            print(f"✗ Failed to load one or both models")
+            print("✗ Failed to load one or both models")
             
         return success
     
-    def _load_single_model(self, checkpoint_path: str, model_type: str) -> bool:
+    def _load_single_model(self, checkpoint_path, model_type):
         """
         Load a single model from checkpoint.
         
@@ -188,11 +172,11 @@ class CAVDualDistancePredictor:
         """
         try:
             if not os.path.exists(checkpoint_path):
-                print(f"Error: Checkpoint file not found at {checkpoint_path}")
+                print("Error: Checkpoint file not found at {}".format(checkpoint_path))
                 return False
             
             # Load checkpoint
-            checkpoint = torch.load(checkpoint_path, map_location=self.device)
+            checkpoint = torch.load(checkpoint_path)
             
             # Initialize appropriate model based on type
             if model_type == 'class0':
@@ -201,7 +185,6 @@ class CAVDualDistancePredictor:
                 model = DistanceModelGated()
             
             model.load_state_dict(checkpoint['model_state_dict'])
-            model.to(self.device)
             model.eval()  # Set to evaluation mode
             
             # Store model and training configuration
@@ -209,26 +192,26 @@ class CAVDualDistancePredictor:
                 self.class0_model = model
                 self.class0_training_config = checkpoint.get('training_config', {})
                 self.class0_loaded = True
-                print(f"✓ Class 0 model loaded successfully")
-                print(f"  Training loss: {checkpoint['loss']:.4f}")
+                print("✓ Class 0 model loaded successfully")
+                print("  Training loss: {:.4f}".format(checkpoint['loss']))
                 if self.class0_training_config:
-                    print(f"  Training samples: {self.class0_training_config.get('training_samples', 'N/A')}")
+                    print("  Training samples: {}".format(self.class0_training_config.get('training_samples', 'N/A')))
             else:
                 self.other_classes_model = model
                 self.other_classes_training_config = checkpoint.get('training_config', {})
                 self.other_classes_loaded = True
-                print(f"✓ Other classes model loaded successfully")
-                print(f"  Training loss: {checkpoint['loss']:.4f}")
+                print("✓ Other classes model loaded successfully")
+                print("  Training loss: {:.4f}".format(checkpoint['loss']))
                 if self.other_classes_training_config:
-                    print(f"  Training samples: {self.other_classes_training_config.get('training_samples', 'N/A')}")
+                    print("  Training samples: {}".format(self.other_classes_training_config.get('training_samples', 'N/A')))
             
             return True
             
         except Exception as e:
-            print(f"Error loading {model_type} model: {e}")
+            print("Error loading {} model: {}".format(model_type, e))
             return False
     
-    def _get_model_for_class(self, class_num: Union[int, float]) -> Optional[torch.nn.Module]:
+    def _get_model_for_class(self, class_num):
         """
         Get the appropriate model based on class number.
         
@@ -243,8 +226,7 @@ class CAVDualDistancePredictor:
         else:
             return self.other_classes_model if self.other_classes_loaded else None
     
-    def _calculate_features_class0(self, x_center: float, y_center: float, 
-                                 width: float, height: float) -> np.ndarray:
+    def _calculate_features_class0(self, x_center, y_center, width, height):
         """
         Calculate features for class 0 model (no class information needed).
         
@@ -265,11 +247,10 @@ class CAVDualDistancePredictor:
         epsilon = 1e-8  # Prevent division by zero
         shape_difference = (width - height) / (width + height + epsilon)
         
-        return np.array([x_center, y_center, width, height, 
-                        normalized_area, shape_difference], dtype=np.float32)
+        # return np.array([x_center, y_center, width, height, normalized_area, shape_difference], dtype=np.float32)
+        return [x_center, y_center, width, height, normalized_area, shape_difference]
     
-    def _calculate_features(self, class_num: float, x_center: float, y_center: float, 
-                          width: float, height: float) -> np.ndarray:
+    def _calculate_features(self, class_num, x_center, y_center, width, height):
         """
         Calculate all required features from bounding box data (for gated model).
         
@@ -291,11 +272,10 @@ class CAVDualDistancePredictor:
         epsilon = 1e-8  # Prevent division by zero
         shape_difference = (width - height) / (width + height + epsilon)
         
-        return np.array([class_num, x_center, y_center, width, height, 
-                        normalized_area, shape_difference], dtype=np.float32)
+        # return np.array([class_num, x_center, y_center, width, height, normalized_area, shape_difference], dtype=np.float32)
+        return [class_num, x_center, y_center, width, height, normalized_area, shape_difference]
     
-    def predict_distance(self, class_num: Union[int, float], x_center: float, 
-                        y_center: float, width: float, height: float) -> Optional[float]:
+    def predict_distance(self, class_num, x_center, y_center, width, height):
         """
         Predict distance for a single detection using the appropriate model.
         
@@ -313,7 +293,7 @@ class CAVDualDistancePredictor:
         
         if model is None:
             model_type = "class 0" if class_num == 0 else "other classes"
-            print(f"Error: Model for {model_type} not loaded.")
+            print("Error: Model for {} not loaded.".format(model_type))
             return None
         
         try:
@@ -326,7 +306,7 @@ class CAVDualDistancePredictor:
                 features = self._calculate_features(class_num, x_center, y_center, width, height)
             
             # Convert to tensor and add batch dimension
-            input_tensor = torch.tensor(features).unsqueeze(0).to(self.device)
+            input_tensor = torch.tensor(features).unsqueeze(0)
             
             # Make prediction
             with torch.no_grad():
@@ -336,10 +316,10 @@ class CAVDualDistancePredictor:
             return distance
             
         except Exception as e:
-            print(f"Error during prediction: {e}")
+            print("Error during prediction: {}".format(e))
             return None
     
-    def predict_batch(self, detections: List[Tuple[Union[int, float], float, float, float, float]]) -> List[Optional[float]]:
+    def predict_batch(self, detections):
         """
         Predict distances for multiple detections at once, using appropriate models.
         
@@ -392,8 +372,7 @@ class CAVDualDistancePredictor:
         
         return results
     
-    def _predict_batch_single_model(self, detections: List[Tuple[Union[int, float], float, float, float, float]], 
-                                   model: torch.nn.Module) -> List[Optional[float]]:
+    def _predict_batch_single_model(self, detections, model):
         """
         Predict distances for multiple detections using a single model.
         
@@ -418,27 +397,28 @@ class CAVDualDistancePredictor:
                 
                 features_list.append(features)
             
-            # Stack into batch tensor
-            batch_tensor = torch.tensor(np.stack(features_list)).to(self.device)
+            # Stack into batch tensor - use explicit conversion for older numpy versions
+            # features_array = np.stack(features_list)
+            batch_tensor = torch.tensor(features_list)
             
             # Make predictions
             with torch.no_grad():
                 predictions = model(batch_tensor)
                 distances = predictions.squeeze().cpu().numpy()
             
-            # Handle single prediction case
+            # Handle single prediction case - explicit conversion for older numpy
             if distances.ndim == 0:
-                distances = [distances.item()]
+                distances = [float(distances.item())]
             else:
-                distances = distances.tolist()
+                distances = [float(x) for x in distances]
             
             return distances
             
         except Exception as e:
-            print(f"Error during batch prediction: {e}")
+            print("Error during batch prediction: {}".format(e))
             return [None] * len(detections)
     
-    def get_model_info(self) -> dict:
+    def get_model_info(self):
         """
         Get information about the loaded models.
         
@@ -448,7 +428,6 @@ class CAVDualDistancePredictor:
         info = {
             'class0_loaded': self.class0_loaded,
             'other_classes_loaded': self.other_classes_loaded,
-            'device': str(self.device),
             'class0_checkpoint_path': self.class0_checkpoint_path,
             'other_classes_checkpoint_path': self.other_classes_checkpoint_path,
             'class0_training_config': self.class0_training_config,
@@ -457,51 +436,29 @@ class CAVDualDistancePredictor:
         return info
     
     @property
-    def is_loaded(self) -> bool:
+    def is_loaded(self):
         """Check if at least one model is loaded"""
         return self.class0_loaded or self.other_classes_loaded
 
 
 # Convenience function for quick model loading
-def load_distance_models(class0_checkpoint_path: str = 'distance_model_checkpoint_class0_only.pth',
-                        other_classes_checkpoint_path: str = 'distance_model_checkpoint_no_class0.pth',
-                        device: Optional[str] = None) -> Optional[CAVDualDistancePredictor]:
+def load_distance_models(class0_checkpoint_path='distance_model_checkpoint_class0_only.pth',
+                        other_classes_checkpoint_path='distance_model_checkpoint_no_class0.pth'):
     """
     Quick function to load and return both distance prediction models.
     
     Args:
         class0_checkpoint_path: Path to class 0 model checkpoint
         other_classes_checkpoint_path: Path to other classes model checkpoint
-        device: Device to use for inference
         
     Returns:
         CAVDualDistancePredictor: Loaded model instance, or None if loading failed
     """
-    predictor = CAVDualDistancePredictor(class0_checkpoint_path, other_classes_checkpoint_path, device)
+    predictor = CAVDualDistancePredictor(class0_checkpoint_path, other_classes_checkpoint_path)
     if predictor.load_models():
         return predictor
     else:
         return None
-
-
-# Backward compatibility - keep the old function name
-def load_distance_model(checkpoint_path: str = 'distance_model_checkpoint_no_class0.pth', 
-                       device: Optional[str] = None) -> Optional[CAVDualDistancePredictor]:
-    """
-    Backward compatibility function - loads dual models with default paths.
-    
-    Args:
-        checkpoint_path: Path to other classes model checkpoint (for backward compatibility)
-        device: Device to use for inference
-        
-    Returns:
-        CAVDualDistancePredictor: Loaded model instance, or None if loading failed
-    """
-    return load_distance_models(
-        class0_checkpoint_path='distance_model_checkpoint_class0_only.pth',
-        other_classes_checkpoint_path=checkpoint_path,
-        device=device
-    )
 
 
 # Example usage
@@ -526,7 +483,7 @@ if __name__ == "__main__":
             width=0.3,        # 30% of image width
             height=0.4        # 40% of image height
         )
-        print(f"Class 0 predicted distance: {distance_class0}")
+        print("Class 0 predicted distance: {}".format(distance_class0))
         
         # Test other class prediction
         distance_other = predictor.predict_distance(
@@ -536,7 +493,7 @@ if __name__ == "__main__":
             width=0.3,        # 30% of image width
             height=0.4        # 40% of image height
         )
-        print(f"Class 1 predicted distance: {distance_other}")
+        print("Class 1 predicted distance: {}".format(distance_other))
         
         # Example batch prediction with mixed classes
         print("\nBatch Predictions:")
@@ -552,13 +509,13 @@ if __name__ == "__main__":
         distances = predictor.predict_batch(detections)
         for i, (detection, distance) in enumerate(zip(detections, distances)):
             class_num = detection[0]
-            print(f"Detection {i+1} (class {class_num}): {distance}")
+            print("Detection {} (class {}): {}".format(i+1, class_num, distance))
         
         # Print model info
-        print(f"\nModel Info:")
+        print("\nModel Info:")
         print("-" * 20)
         info = predictor.get_model_info()
         for key, value in info.items():
-            print(f"{key}: {value}")
+            print("{}: {}".format(key, value))
     else:
         print("Failed to load models!")
