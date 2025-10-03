@@ -270,8 +270,9 @@ def selfDrvieAdapt(logger):
             #     condition = False
 
             t2 = time.time()
-            dt = t2 - tO
-            print(f"Time Elasped: {dt}")
+            dt = t2 - tO #Time elasped per one loop 
+
+            print(f"Time Elapaed: {dt}")
             #Append to data fiel 
             newLine = pd.DataFrame([[tO,t2,dt,laneState.getState()]], columns=['tO', 't2', 'dt', 'State'])
             newLine.to_csv('testfile.csv', mode='a', header=False, index=False)
