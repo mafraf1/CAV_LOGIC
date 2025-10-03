@@ -270,7 +270,7 @@ def selfDrvieAdapt(logger):
             #     condition = False
 
             t2 = time.time()
-            dt = tO - t2
+            dt = t2 - tO
             print(f"Time Elasped: {dt}")
             #Append to data fiel 
             newLine = pd.DataFrame([[tO,t2,dt,laneState.getState()]], columns=['tO', 't2', 'dt', 'State'])
