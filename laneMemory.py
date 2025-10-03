@@ -6,21 +6,13 @@ class laneMemory:
     # may contain methods in handling comparison between two lane Memories 
     # AIM:  to help fix some on the inconsistencies with the current lane detection
 
-    def __init__(self):
-        #Default Constructor
-        self.leftExist = False
-        self.rightExist = False
-        self.leftLane = []
-        self.rightLane = []
-        self.laneCentreList = [] #List of previous lane centres
 
-    def __init__(self, pLeftExist, pRightExist, pLeftLane, pRightLane, pLaneCentreList):
-        #Constructor with parameters 
+    def __init__(self, pLeftExist=False, pRightExist=False, pLeftLane=None, pRightLane=None, pLaneCentreList=None):
         self.leftExist = pLeftExist
         self.rightExist = pRightExist
-        self.leftLane = pLeftLane
-        self.rightLane = pRightLane
-        self.laneCentreList = pLaneCentreList
+        self.leftLane = pLeftLane if pLeftLane is not None else []
+        self.rightLane = pRightLane if pRightLane is not None else []
+        self.laneCentreList = pLaneCentreList if pLaneCentreList is not None else []
 
     def updateLaneCentreList(self, newCentre):
         self.laneCentreList.append(newCentre)

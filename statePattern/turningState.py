@@ -44,7 +44,7 @@ class turningState:
     def proccess(self, frame, scale, model, df, midX, laneCenter, newMemory, cameras):
         if self.idx == 0: 
             #First entered state 
-            self.assignPresistentMemory(laneMemory(False,False,[],[]))
+            self.assignPresistentMemory(laneMemory())
             self.idx = 1
             self.assignPresistentMemory(newMemory)
         print("PM L:", self.presistentMemory.leftExist, " PM R: ", self.presistentMemory.rightExist)
