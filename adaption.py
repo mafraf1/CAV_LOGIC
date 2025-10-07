@@ -129,6 +129,8 @@ def gstreamer_pipeline(
             display_height,
         )
     )
+
+
 def selfDrvieAdapt(logger):
     #Define PID Controller 
     pid = PIDController(kp = 0.3, ki = 0.2, kd = 0.0002, integral_limit = 100)
@@ -181,6 +183,7 @@ def selfDrvieAdapt(logger):
     #capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     #Processing each frame
     condition = True 
+    newLine = ""
     # keyboard = keyboardListener()
     # keyboard.initKeyboard() 
     try:
@@ -219,8 +222,7 @@ def selfDrvieAdapt(logger):
             # if distance_predictor:
             #     results = distance_predictor.predict_batch(signList)
             #     print(f"Distance Predictions:  {results}")
-            # &
-            #print(lines)
+            # print(lines)
 
             #if lines:
             #    for line in lines: 
@@ -274,8 +276,9 @@ def selfDrvieAdapt(logger):
 
             print(f"Time Elapaed: {dt}")
             #Append to data fiel 
-            newLine = pd.DataFrame([[tO,t2,dt,laneState.getState()]], columns=['tO', 't2', 'dt', 'State'])
-            newLine.to_csv('testfile.csv', mode='a', header=False, index=False)
+            # newLine = pd.DataFrame([[tO,t2,dt,laneState.getState()]], columns=['tO', 't2', 'dt', 'State'])
+            # newLine.to_csv('testfile.csv', mode='a', header=False, index=False)
+            newLine = newLine + f"{dt},{laneState.getState()}\n"
     except Exception as e: #neccesary to ensure cameras are turned off properly otherwise the CAV will need to be reset
         print("Immediate stop of function: ", e)
         logger.error("Immediate stop of function: ", e)
@@ -306,6 +309,8 @@ def selfDrvieAdapt(logger):
     logger.info("PWM Stopped") 
     GPIO.cleanup()
     logger.info("GPIO cleaned up") 
+    logger.info("Test One")
+    logger.info(newLine)
     # print("Press 'q' to end.")
     # keyboard.endKeyboard()
     # logger.info("Closed Keyboard")

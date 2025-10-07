@@ -68,7 +68,7 @@ class correctionState:
         
         if newMemory.leftExist == True and newMemory.rightExist == True:
             self.changeStateTwoLane() 
-        elif (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
+        elif (laneCenter <= 3*frame.shape[1]/8 or laneCenter >= 5*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
             #makes sure turning state is correctly defined 
             leftLane, rightLane = self.defineList(leftLane + rightLane)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane,[])
@@ -96,9 +96,9 @@ class correctionState:
                         laneCenter = laneCenter + laneCenter/2 #maxed out right
                 else: 
                     if self.presistentMemory.leftExist == True:
-                        laneCenter = laneCenter - frame.shape[1]/4 #half left
+                        laneCenter = laneCenter + frame.shape[1]/4 #half left
                     else:
-                        laneCenter = laneCenter + frame.shape[1]/4 #half right
+                        laneCenter = laneCenter - frame.shape[1]/4 #half right
                     #swap cameras 
                     self.swapStreams()
                 sideFrame = sf.overlaySideImage(polygonList2, nFrame)
