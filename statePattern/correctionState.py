@@ -19,7 +19,7 @@ class correctionState:
         self.idx = 0
         self.curStream = 0
         self.othStream = 0
-        self.speed = 13
+        self.speed = 13 - 0.4
         # self.left = left #Left Lane exists: Boolean
         # self.right = right #Right Lane exists: Boolean
         # #Ideally one one should ever be true 
@@ -65,11 +65,12 @@ class correctionState:
         newMemory = sf.doesLeftOrRightExist(leftLane, rightLane, scale, newMemory)
         laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
         #Check main camera 
-        
+        print(f"CS lc: {laneCenter}")
         if newMemory.leftExist == True and newMemory.rightExist == True:
             self.changeStateTwoLane() 
-        elif (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8) and (laneCenter != 0): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
+        elif (laneCenter < frame.shape[1]/8 or laneCenter > 7*frame.shape[1]/8) and (laneCenter != 0 or laneCenter != 160) : #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
             #makes sure turning state is correctly defined 
+            print(f"CS exit lc: {laneCenter}")
             leftLane, rightLane = self.defineList(leftLane + rightLane)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane,[])
             self.changeStateTurning()
@@ -91,9 +92,9 @@ class correctionState:
                 #if there are enough detections then turn normally otherwise turn the opposite direction
                 if len(polygonList2) > 3: # enough detections
                     if self.curStream == CameraNotation.LEFT.value: #left camera
-                        laneCenter =  frame.shape[1]/4 #maxed out left
+                        laneCenter =  frame.shape[1] /8 #maxed out left
                     else:
-                        laneCenter = 3 * frame.shape[1]/4 #maxed out right
+                        laneCenter = 7*frame.shape[1]/8 #maxed out right
                 else: 
                     self.swapStreams()
                 sideFrame = sf.overlaySideImage(polygonList2, nFrame)

@@ -39,10 +39,9 @@ class twoLaneState:
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         cv2.imshow("final", newFrame)
         if newMemory.leftExist == False or newMemory.rightExist == False:
-            if (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8):
-                self.changeStateTurning()
-            else:
-                self.changeState()
+            self.changeStateTurning()
+        elif newMemory.leftExist == False and newMemory.rightExist == False:
+            self.changeState() 
         return laneCenter, newMemory, command
     
 

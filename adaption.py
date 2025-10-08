@@ -239,7 +239,7 @@ def selfDrvieAdapt(logger):
                 error = midX - laneCenter
                 steering_adjustment = pid.update(error, 0.1/frame_rate)
                 angle = 90 + (steering_adjustment * (-0.5)) 
-                if newMemory.leftExist or newMemory.rightExist or (laneState.getState() == "Correction State"):
+                if newMemory.leftExist or newMemory.rightExist or  (laneState.getState() == "Correction State"):
                     #range is 0 - 100
                     command = "S" + str(commandFloat) + "\n"
                     print("Forward Sent - ", command)
@@ -309,7 +309,7 @@ def selfDrvieAdapt(logger):
     logger.info("PWM Stopped") 
     GPIO.cleanup()
     logger.info("GPIO cleaned up") 
-    logger.info("Test One")
+    logger.info("Test One -- Trial three -- twelve: 32")
     logger.info(newLine)
     # print("Press 'q' to end.")
     # keyboard.endKeyboard()
