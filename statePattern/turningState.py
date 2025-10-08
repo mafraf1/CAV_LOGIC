@@ -58,10 +58,13 @@ class turningState:
             self.changeStateTwoLane() 
         elif (laneCenter >= 3*frame.shape[1]/8 and laneCenter <= 5*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
             #makes sure turning state is correctly defined 
+            self.idx == 0 
+            self.changeStateCorrection()
+        else:
             leftLane, rightLane = self.defineList(leftLane + rightLane)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane, [])
-        laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
-        command = sp.calc_speed(newMemory.leftLane, newMemory.rightLane, scale)
+            laneCenter = sf.findLaneCenter(newMemory.leftLane, newMemory.rightLane, 900 * scale, midX, laneCenter)
+            command = sp.calc_speed(newMemory.leftLane, newMemory.rightLane, scale)
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         
         cv2.imshow("final", newFrame)
