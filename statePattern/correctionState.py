@@ -68,7 +68,7 @@ class correctionState:
         
         if newMemory.leftExist == True and newMemory.rightExist == True:
             self.changeStateTwoLane() 
-        elif (laneCenter <= 3*frame.shape[1]/8 or laneCenter >= 5*frame.shape[1]/8): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
+        elif (laneCenter <= 2*frame.shape[1]/8 or laneCenter >= 6*frame.shape[1]/8) and (laneCenter != 0): #switches over after 15 detections and if the laneCenter is defined in the center of the screen 
             #makes sure turning state is correctly defined 
             leftLane, rightLane = self.defineList(leftLane + rightLane)
             newMemory = laneMemory(self.presistentMemory.leftExist, self.presistentMemory.rightExist, leftLane, rightLane,[])
@@ -90,16 +90,11 @@ class correctionState:
                 print("LL: ", newMemory.leftExist, "RL: ", newMemory.rightExist)
                 #if there are enough detections then turn normally otherwise turn the opposite direction
                 if len(polygonList2) > 3: # enough detections
-                    if self.presistentMemory.rightExist == True:
-                        laneCenter = laneCenter/2 #maxed out left
+                    if self.curStream == CameraNotation.LEFT.value: #left camera
+                        laneCenter =  frame.shape[1]/4 #maxed out left
                     else:
-                        laneCenter = laneCenter + laneCenter/2 #maxed out right
+                        laneCenter = 3 * frame.shape[1]/4 #maxed out right
                 else: 
-                    if self.presistentMemory.leftExist == True:
-                        laneCenter = laneCenter + frame.shape[1]/4 #half left
-                    else:
-                        laneCenter = laneCenter - frame.shape[1]/4 #half right
-                    #swap cameras 
                     self.swapStreams()
                 sideFrame = sf.overlaySideImage(polygonList2, nFrame)
                 cv2.imshow("side_cam", sideFrame)
