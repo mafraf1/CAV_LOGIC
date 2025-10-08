@@ -19,7 +19,7 @@ class correctionState:
         self.idx = 0
         self.curStream = 0
         self.othStream = 0
-        self.speed = "S13\n"
+        self.speed = 13
         # self.left = left #Left Lane exists: Boolean
         # self.right = right #Right Lane exists: Boolean
         # #Ideally one one should ever be true 
@@ -100,7 +100,7 @@ class correctionState:
                 cv2.imshow("side_cam", sideFrame)
             else: #raise an error message 
                 CameraStreamError("Camera Stream is null")#raise error
-        command = sp.calc_speed(newMemory.leftLane, newMemory.rightLane, scale)
+        command = self.speed
         newFrame = sf.overlayimage(scale, newMemory.leftLane, newMemory.rightLane, laneCenter, frame)
         
         cv2.imshow("final", newFrame)

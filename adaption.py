@@ -239,7 +239,7 @@ def selfDrvieAdapt(logger):
                 error = midX - laneCenter
                 steering_adjustment = pid.update(error, 0.1/frame_rate)
                 angle = 90 + (steering_adjustment * (-0.5)) 
-                if newMemory.leftExist or newMemory.rightExist:
+                if newMemory.leftExist or newMemory.rightExist or (laneState.getState() == "Correction State"):
                     #range is 0 - 100
                     command = "S" + str(commandFloat) + "\n"
                     print("Forward Sent - ", command)
@@ -274,8 +274,8 @@ def selfDrvieAdapt(logger):
             t2 = time.time()
             dt = t2 - tO #Time elasped per one loop 
 
-            print(f"Time Elapaed: {dt}")
-            #Append to data fiel 
+            #print(f"Time Elapaed: {dt}")
+            #Append to data file
             # newLine = pd.DataFrame([[tO,t2,dt,laneState.getState()]], columns=['tO', 't2', 'dt', 'State'])
             # newLine.to_csv('testfile.csv', mode='a', header=False, index=False)
             newLine = newLine + f"{dt},{laneState.getState()}\n"
